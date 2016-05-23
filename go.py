@@ -15,7 +15,12 @@ def main():
     features, labels = parse_all_games()
     assert(len(features) == len(labels))
     print len(features)
-
+    with open("all_features", "w") as f1:
+        f1.write(pickle.dumps(features))
+        f1.close()
+    with open("all_labels", "w") as f2:
+        f2.write(pickle.dumps(labels))
+        f2.close()
 
 
 def parse_all_games():
@@ -71,6 +76,7 @@ def Game_Parser(gamefile):
     # stop distingush between black and white stone by
     # universally call the stones "my stones" and "oponent's stones"
     features, labels = universalize_stones(board_positions, next_moves)
+    assert(len(features) == len(labels))
     return features, labels
 
 def universalize_stones(positions, moves):
@@ -86,6 +92,7 @@ def universalize_stones(positions, moves):
             reversed_position[reversed_position == 1] = 10
             reversed_position[reversed_position == 2] = 1
             reversed_position[reversed_position == 10] = 2
+            features.append(reversed_position)
         else:
             raise Exception("a move type can't be any number other than 1 or 2")
     return features, labels
