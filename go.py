@@ -29,12 +29,23 @@ def Game_Parser(gamefile):
             all_moves += line[1:].strip().split(";")
 
     for move in all_moves:
-        print parse_move(move)
+        next_moves.append(parse_move(move))
+        new_board_position = add_stone_to_board(board_positions[-1], next_moves[-1])
+        board_positions.append(new_board_position)
 
 
 
-    #print pd.DataFrame(start_positions)
 
+
+
+def add_stone_to_board(board, move):
+    column = move[1][0]
+    row = move[1][1]
+    if board[column][row] != 0:
+        raise Exception("this position already has a stone!")
+    else:
+        board[column][row] = move[0]
+    return board
 
 
 def parse_move(move):
