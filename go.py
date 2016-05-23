@@ -49,6 +49,8 @@ def Game_Parser(gamefile):
 
     board_positions.append(start_positions)
     for move in all_moves:
+        if "[tt]" in move:
+            continue
         next_moves.append(parse_move(move))
         new_board_position = add_stone_to_board(board_positions[-1], next_moves[-1])
         board_positions.append(new_board_position)
@@ -82,7 +84,9 @@ def add_stone_to_board(board, move):
     column = move[1][0]
     row = move[1][1]
     if board[column][row] != 0:
-        raise Exception("this position already has a stone!")
+        # raise Exception("this position already has a stone!")
+        # TODO: solve taking stone way
+        pass
     else:
         board[column][row] = move[0]
     return board
