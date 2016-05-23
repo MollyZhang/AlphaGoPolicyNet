@@ -10,17 +10,14 @@ import pickle
 STONE_DICT = {"empty": 0, "W": 1, "B": 2}
 STONE_DICT2 = {"Empty": 0, "Me": 1, "Opponent": 2}
 
+COLUMNS = [chr(ord('a') + i) for i in range(19)]
+ROWS = [chr(ord('a') + i) for i in range(19)]
+
 
 def main():
-    features, labels = parse_all_games()
-    assert(len(features) == len(labels))
-    print len(features)
-    with open("all_features", "w") as f1:
-        f1.write(pickle.dumps(features))
-        f1.close()
-    with open("all_labels", "w") as f2:
-        f2.write(pickle.dumps(labels))
-        f2.close()
+    boards, moves = Game_Parser("fakegame1.sgf")
+
+
 
 
 def parse_all_games():
@@ -57,18 +54,24 @@ def Game_Parser(gamefile):
     for line in f:
         if line[0:3] == "AB[" or line[0:3] == "AW[":
             add_starting_stones(start_positions, line)
-        elif line[0] == ";":
+        elif line[0] == ";" and ";B[" in line and ";W[" in line:
             all_moves += line.strip().strip().split(";")
 
     board_positions.append(start_positions)
     all_moves = filter(None, all_moves)  # remove empty string in list
 
     for move in all_moves:
+        print pd.DataFrame(board_positions[-1], columns=COLUMNS, index=ROWS)
+        print move
+        print "------------------------"
+
+
         if "[tt]" in move:
             continue
         next_moves.append(parse_move(move))
         new_board_position = add_stone_to_board(board_positions[-1], next_moves[-1])
         board_positions.append(new_board_position)
+
 
     # remove last board position because there is no new moves
     board_positions.pop(-1)
@@ -100,12 +103,12 @@ def universalize_stones(positions, moves):
 def add_stone_to_board(board, move):
     column = move[1][0]
     row = move[1][1]
-    if board[column][row] != 0:
+    if board[row][column] != 0:
         # raise Exception("this position already has a stone!")
         # TODO: solve taking stone way
         pass
     else:
-        board[column][row] = move[0]
+        board[row][column] = move[0]
     return board
 
 
@@ -120,7 +123,7 @@ def add_starting_stones(start_positions, line):
     for p in positions:
         column = ord(p[0]) - ord('a')
         row = ord(p[1]) - ord('a')
-        start_positions[column][row] = STONE_DICT[line[1]]
+        start_positions[row][column] = STONE_DICT[line[1]]
     return start_positions
 
 if __name__ == '__main__':
