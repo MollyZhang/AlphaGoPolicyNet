@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import glob
 import os
+import pickle
 
 
 
@@ -11,6 +12,13 @@ STONE_DICT2 = {"Empty": 0, "Me": 1, "Opponent": 2}
 
 
 def main():
+    features, labels = parse_all_games()
+    assert(len(features) == len(labels))
+    print len(features)
+
+
+
+def parse_all_games():
     all_files = get_all_game_files()
     all_features = []
     all_labels = []
@@ -20,7 +28,7 @@ def main():
         features, labels = Game_Parser(all_files[i])
         all_features += features
         all_labels += labels
-
+    return all_features, all_labels
 
 
 def get_all_game_files():
@@ -40,14 +48,16 @@ def Game_Parser(gamefile):
     all_moves = []
     next_moves = []
     f = open(gamefile, "r")
-    start_positions = np.zeros((19,19))
+    start_positions = np.zeros((19, 19))
     for line in f:
         if line[0:3] == "AB[" or line[0:3] == "AW[":
             add_starting_stones(start_positions, line)
         elif line[0] == ";":
-            all_moves += line[1:].strip().strip().split(";")
+            all_moves += line.strip().strip().split(";")
 
     board_positions.append(start_positions)
+    all_moves = filter(None, all_moves)  # remove empty string in list
+
     for move in all_moves:
         if "[tt]" in move:
             continue
