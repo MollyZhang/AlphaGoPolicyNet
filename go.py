@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import pandas as pd
 
-STONE_DICT = {"empty": 0, "white": 1, "black": 2}
+STONE_DICT = {"empty": 0, "W": 1, "B": 2}
 
 
 
@@ -17,6 +17,7 @@ def Game_Parser(gamefile):
     second list: the position of next move at any given time (label)
     """
     board_positions = []
+    all_moves = []
     next_moves = []
     f = open(gamefile, "r")
     start_positions = np.zeros((19,19))
@@ -25,20 +26,29 @@ def Game_Parser(gamefile):
             add_starting_stones(start_positions, line)
         elif line[0] == ";":
             board_positions.append(start_positions)
-            pass
+            all_moves += line[1:].strip().split(";")
 
-    print pd.DataFrame(start_positions)
+    for move in all_moves:
+        print parse_move(move)
+
+
+
+    #print pd.DataFrame(start_positions)
+
+
+
+def parse_move(move):
+    column = ord(move[2]) - ord('a')
+    row = ord(move[3]) - ord('a')
+    return (STONE_DICT[move[0]], (column, row))
+
 
 def add_starting_stones(start_positions, line):
-    if line[0:3] == "AB[":
-        stone_type = "black"
-    elif line[0:3] == "AW[":
-        stone_type = "white"
-    positions = line[3:-3].split("][")
+    positions = line[3:].strip()[0:-1].split("][")
     for p in positions:
         column = ord(p[0]) - ord('a')
         row = ord(p[1]) - ord('a')
-        start_positions[column][row] = STONE_DICT[stone_type]
+        start_positions[column][row] = STONE_DICT[line[1]]
     return start_positions
 
 if __name__ == '__main__':
