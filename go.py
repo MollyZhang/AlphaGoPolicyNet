@@ -1,15 +1,35 @@
 import sys
 import numpy as np
 import pandas as pd
+import glob
+import os
+
+
 
 STONE_DICT = {"empty": 0, "W": 1, "B": 2}
 STONE_DICT2 = {"Empty": 0, "Me": 1, "Opponent": 2}
 
 
 def main():
-    (features, labels) = Game_Parser("Database/0196-1699/0196-00-00.sgf")
+    all_files = get_all_game_files()
+    all_features = []
+    all_labels = []
+    for i in range(len(all_files)):
+        print i
+        print all_files[i]
+        features, labels = Game_Parser(all_files[i])
+        all_features += features
+        all_labels += labels
 
 
+
+def get_all_game_files():
+    folders = glob.glob("Database/*")
+    game_files = []
+    for folder in folders:
+        if folder != "Non19x19Boards":
+            game_files += glob.glob(folder + "/" + "*.sgf")
+    return game_files
 
 def Game_Parser(gamefile):
     """take a game in SGF format and convert it to 2 lists:
