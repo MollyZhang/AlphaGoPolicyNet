@@ -6,7 +6,7 @@ import os
 import pickle
 
 
-
+NUM_GAMES = 85931
 STONE_DICT = {"empty": 0, "W": 1, "B": 2}
 STONE_DICT2 = {"Empty": 0, "Me": 1, "Opponent": 2}
 
@@ -14,13 +14,15 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 
+
+
 def main():
-    parse_all_games()
+    parse_games(1000)
 
 
 
-def parse_all_games():
-    all_files = get_all_game_files()
+def parse_games(num_games):
+    all_files = get_game_files(num_games=num_games)
     all_features = []
     all_labels = []
     for i in range(len(all_files)):
@@ -32,13 +34,17 @@ def parse_all_games():
     return all_features, all_labels
 
 
-def get_all_game_files():
+def get_game_files(num_games="All"):
     folders = glob.glob("Database/*")
     game_files = []
     for folder in folders:
         if folder != "Non19x19Boards":
             game_files += glob.glob(folder + "/" + "*.sgf")
-    return game_files
+    if num_games == "All":
+        return game_files
+    else:
+        return np.array(game_files)[np.random.permutation(NUM_GAMES)[:num_games]]
+
 
 def Game_Parser(gamefile):
     """take a game in SGF format and convert it to 2 lists:
