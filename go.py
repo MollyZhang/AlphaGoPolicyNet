@@ -15,8 +15,7 @@ ROWS = [chr(ord('a') + i) for i in range(19)]
 
 
 def main():
-    boards, moves = Game_Parser("fakegame1.sgf")
-
+    parse_all_games()
 
 
 
@@ -61,11 +60,6 @@ def Game_Parser(gamefile):
     all_moves = filter(None, all_moves)  # remove empty string in list
 
     for move in all_moves:
-        print pd.DataFrame(board_positions[-1], columns=COLUMNS, index=ROWS)
-        print move
-        print "------------------------"
-
-
         if "[tt]" in move:
             continue
         next_moves.append(parse_move(move))
@@ -112,9 +106,8 @@ def add_stone_to_board(board, move):
         board[row][column] = my_stone_type
         neighbors = get_neighbors_on_board((row, column))
         for neighbor in neighbors:
-            if board[neighbor] != move[0] and board[neighbor] != 0:
-                remove_stones(board, neighbor, opponent_stone_type)
-
+            if board[neighbor] == opponent_stone_type:
+                board = remove_stones(board, neighbor, opponent_stone_type)
     return board
 
 
