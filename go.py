@@ -120,13 +120,22 @@ def add_stone_to_board(board, move):
 
 def remove_stones(board, stone, stone_type):
     stones_to_be_removed = get_connecting_stone_groups(board, stone, stone_type)
-    eye_count = count_eyes(stones_to_be_removed, board)
+    eye_count = count_eyes(stones_to_be_removed, board, stone_type)
     if eye_count == 0:
         for stone in stones_to_be_removed:
             board[stone] = 0
     else:
         pass
     return board
+
+def count_eyes(stones_to_be_removed, board, stone_type):
+    eyes = []
+    for stone in stones_to_be_removed:
+        for each_neighor in get_neighbors_on_board(stone):
+            if board[each_neighor] == 0:
+                eyes.append(each_neighor)
+    return len(set(eyes))
+
 
 
 def get_connecting_stone_groups(board, stone, stone_type):
