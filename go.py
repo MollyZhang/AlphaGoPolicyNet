@@ -103,13 +103,62 @@ def universalize_stones(positions, moves):
 def add_stone_to_board(board, move):
     column = move[1][0]
     row = move[1][1]
+
+    my_stone_type = move[0]
+    opponent_stone_type = [x for x in [1,2] if x != move[0]][0]
     if board[row][column] != 0:
-        # raise Exception("this position already has a stone!")
-        # TODO: solve taking stone way
-        pass
+        raise Exception("this position already has a stone!")
     else:
-        board[row][column] = move[0]
+        board[row][column] = my_stone_type
+        neighbors = get_neighbors_on_board((row, column))
+        for neighbor in neighbors:
+            if board[neighbor] != move[0] and board[neighbor] != 0:
+                remove_stones(board, neighbor, opponent_stone_type)
+
     return board
+
+
+def remove_stones(board, stone, stone_type):
+    stones_to_be_removed = get_connecting_stone_groups(board, stone, stone_type)
+    eye_count = count_eyes(stones_to_be_removed, board)
+    if eye_count == 0:
+        for stone in stones_to_be_removed:
+            board[stone] = 0
+    else:
+        pass
+    return board
+
+
+def get_connecting_stone_groups(board, stone, stone_type):
+    stone_group = [stone]
+    while True:
+        new_stone_added = 0
+        for stone in stone_group:
+            neighbors = get_neighbors_on_board(stone)
+            for neighbor in neighbors:
+                if board[neighbor] == stone_type and neighbor not in stone_group:
+                    stone_group.append(neighbor)
+                    new_stone_added += 1
+        if new_stone_added == 0:
+            break
+    return stone_group
+
+
+def get_neighbors_on_board(stone):
+    row, column = stone
+    neighbors = []
+    if row + 1 <= 18:
+        neighbors.append((row+1, column))
+    if row - 1 >= 0:
+        neighbors.append((row-1, column))
+    if column + 1 <= 18:
+        neighbors.append((row, column+1))
+    if column - 1 >= 0:
+        neighbors.append((row, column-1))
+    return neighbors
+
+
+
 
 
 def parse_move(move):
