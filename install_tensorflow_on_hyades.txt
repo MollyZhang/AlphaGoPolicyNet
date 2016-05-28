@@ -1,0 +1,39 @@
+Had a lot of trouble installing tensorflow (including cuDNN, libc) so I am writing down the process of my installation:
+
+
+### Installing TensorFlow
+0. install tensorflow (GPU enabled) for Ubuntu/Linux for user by:
+`pip install --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow-0.8.0-cp27-none-linux_x86_64.whl --user`
+
+
+### Installing cuDNN and set the correct PATH for TensorFlow
+1. ssh into hyades, and then ssh into gpu-1
+2. go to NVIDIA cuDNN, register user account, and then log in and download cuDNN 4.0 
+3. untar cuDNN: `tar xvf cudnn-7.0-linux-x64-v4.0-prod.tar`, saved in a folder `~/deep_learning/cuda`
+4. create a local cuda folder by `mkdir cuda`
+5. copy hyades intallation to cuda to local cuda `cp -r /pfs/sw/cuda/7.5/* ~/cuda/`
+6. copy the cudnn.h file and all the lib64/libcudnn* files from cuDNN to local cuda by:
+`cp deep_learning/cuda/include/cudnn.h cuda/include/`
+`cp deep_learning/cuda/lib64/libcudnn* cuda/lib64/`
+7. export LD_LIBRARY_PATH="/home/mollyzhang/cuda/lib64/:$LD_LIBRARY_PATH"
+
+### install the correct version of GNU C Library by:
+`mkdir ~/my_libc_env
+cd ~/my_libc_env
+wget http://launchpadlibrarian.net/137699828/libc6_2.17-0ubuntu5_amd64.deb
+wget http://launchpadlibrarian.net/137699829/libc6-dev_2.17-0ubuntu5_amd64.deb
+wget ftp://rpmfind.net/linux/sourceforge/m/ma/magicspecs/apt/3.0/x86_64/RPMS.lib/libstdc++-4.8.2-7mgc30.x86_64.rpm
+ar p libc6_2.17-0ubuntu5_amd64.deb data.tar.gz | tar zx
+ar p libc6-dev_2.17-0ubuntu5_amd64.deb data.tar.gz | tar zx
+rpm2cpio libstdc++-4.8.2-7mgc30.x86_64.rpm| cpio -idmv`
+
+
+### run python with the following local LD_LIBRARY_PATH:
+
+`LD_LIBRARY_PATH="$HOME/my_libc_env/lib/x86_64-linux-gnu/:$HOME/my_libc_env/usr/lib64/:$LD_LIBRARY_PATH" $HOME/my_libc_env/lib/x86_64-linux-gnu/ld-2.17.so `which python`
+
+then import tensorflow, at this point it should work
+
+
+
+
