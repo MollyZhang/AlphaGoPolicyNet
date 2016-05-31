@@ -15,23 +15,26 @@ ROWS = [chr(ord('a') + i) for i in range(19)]
 
 
 
-
-def main():
-    parse_games(1000)
-
-
-
-def parse_games(num_games):
+def parse_games(num_games, test_percent=0.2, val_percent=0.2):
     all_files = get_game_files(num_games=num_games)
     all_features = []
     all_labels = []
     for i in range(len(all_files)):
-        print i
+        print "game", i
         print all_files[i]
         features, labels = Game_Parser(all_files[i])
         all_features += features
         all_labels += labels
-    return all_features, all_labels
+    randomized_game_index = np.random.permutation(num_games)
+    num_test = int(test_percent * num_games)
+    num_val = int(val_percent * num_games)
+    x_test = np.array(all_features)[randomized_game_index[:num_test]]
+    y_test = np.array(all_labels)[randomized_game_index[:num_test]]
+    x_val = np.array(all_features)[randomized_game_index[num_test: num_test+num_val]]
+    y_val = np.array(all_labels)[randomized_game_index[num_test: num_test+num_val]]
+    x_train = np.array(all_features)[randomized_game_index[num_test+num_val:]]
+    y_train = np.array(all_labels)[randomized_game_index[num_test+num_val:]]
+    return x_train, x_val, x_test, y_train, y_val, y_test
 
 
 def get_game_files(num_games="All"):
@@ -182,6 +185,3 @@ def add_starting_stones(start_positions, line):
         row = ord(p[1]) - ord('a')
         start_positions[row][column] = STONE_DICT[line[1]]
     return start_positions
-
-if __name__ == '__main__':
-    main()
