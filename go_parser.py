@@ -60,7 +60,7 @@ def Game_Parser(gamefile):
     start_positions = np.zeros((19, 19))
     for line in f:
         if line[0:3] == "AB[" or line[0:3] == "AW[":
-            add_starting_stones(start_positions, line)
+            start_positions = add_starting_stones(start_positions, line)
         elif line[0] == ";" and ";B[" in line and ";W[" in line:
             all_moves += line.strip().strip().split(";")
 
@@ -71,20 +71,16 @@ def Game_Parser(gamefile):
         if "[tt]" in move:
             continue
         next_moves.append(parse_move(move))
-        column, row = parse_move(move)[1]
-        assert(board_positions[-1][row, column] == 0) # make sure there is no stone already at the position next move
-        new_board_position = add_stone_to_board(board_positions[-1], next_moves[-1])
+        new_board_position = add_stone_to_board(np.array(board_positions[-1], copy=True),
+                                                next_moves[-1])
         board_positions.append(new_board_position)
-
 
     # remove last board position because there is no new moves
     board_positions.pop(-1)
     # stop distingush between black and white stone by
     # universally call the stones "my stones" and "oponent's stones"
     features, labels = universalize_stones(board_positions, next_moves)
-
     assert(len(features) == len(labels))
-
     return features, labels
 
 def universalize_stones(positions, moves):
@@ -110,6 +106,7 @@ def add_stone_to_board(board, move):
     row = move[1][1]
     my_stone_type = move[0]
     opponent_stone_type = [x for x in [1,2] if x != move[0]][0]
+
     if board[row][column] != 0:
         raise Exception("this position already has a stone!")
     else:
