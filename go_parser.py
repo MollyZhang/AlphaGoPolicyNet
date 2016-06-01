@@ -1,3 +1,10 @@
+"""
+Import to notice: Go game SGF format specifies a stone position by "column, row",
+however, numpy specifies a 2d array position by "row, column"
+therefore the returned label is converted to the format of numpy convention "row, column" for downstream convenience
+TAKEAWAY: everything is in "row, column" format
+"""
+
 import sys
 import numpy as np
 import pandas as pd
@@ -80,6 +87,8 @@ def Game_Parser(gamefile):
     # stop distingush between black and white stone by
     # universally call the stones "my stones" and "oponent's stones"
     features, labels = universalize_stones(board_positions, next_moves)
+    labels = [tuple((move[1], move[0])) for move in labels] # swtich column and row for future convenience
+
     assert(len(features) == len(labels))
     return features, labels
 
@@ -100,6 +109,7 @@ def universalize_stones(positions, moves):
         else:
             raise Exception("a move type can't be any number other than 1 or 2")
     return features, labels
+
 
 def add_stone_to_board(board, move):
     column = move[1][0]
