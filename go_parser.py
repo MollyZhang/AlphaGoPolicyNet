@@ -92,16 +92,27 @@ def Game_Parser(gamefile):
     # universally call the stones "my stones" and "oponent's stones"
     features, labels = universalize_stones(board_positions, next_moves)
     labels = [tuple((move[1], move[0])) for move in labels] # swtich column and row for future convenience
-    oneD_labels = map_2d_to_1d(labels)
+
+    oneD_features = map_2d_to_1d(features, "x")
+    oneD_labels = map_2d_to_1d(labels, "y")
+
+
 
     assert(len(features) == len(oneD_labels))
-    return features, oneD_labels
+    return oneD_features, oneD_labels
 
-def map_2d_to_1d(labels):
+def map_2d_to_1d(datas, data_type):
     """labels are tuples, which is hard to use as part of neural net, therefore
     I convert the label tuples (19x19 possible values) to a 1d array of lenght 19*19=361
     counted in the row-first-column-scecond order """
-    return [label[0]*19+label[1] for label in labels]
+    if data_type == "y":
+        return [label[0]*19+label[1] for label in datas]
+    elif data_type == "x":
+        return [np.array(feature).flatten() for feature in datas]
+    else:
+        raise Exception("only 'x' or 'y' can be passed as 2nd parameter in this function")
+
+
 
 def map_1d_to_2d(labels):
     """the reversion of 1d label to 2d tuple label"""

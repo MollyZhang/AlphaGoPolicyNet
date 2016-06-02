@@ -1,5 +1,8 @@
 import pandas as pd
 import go_parser
+import network3
+from network3 import Network
+
 import gzip, cPickle
 import datetime
 import tensorflow as tf
@@ -9,6 +12,9 @@ import tensorflow as tf
 def main():
     train_data, val_data, test_data = \
         go_parser.parse_games(1000, test_percent=0.2, val_percent=0.2)
+
+    print train_data[0].shape
+    print train_data[1].shape
 
 
 def comparing_data_loading_time():
