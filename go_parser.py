@@ -55,6 +55,7 @@ def get_game_files(num_games="All"):
     if num_games == "All":
         return game_files
     else:
+        np.random.seed(0)
         return np.array(game_files)[np.random.permutation(NUM_GAMES)[:num_games]]
 
 
