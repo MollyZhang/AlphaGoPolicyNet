@@ -31,9 +31,9 @@ def parse_games(num_games, test_percent=0.2, val_percent=0.2):
         features, labels = Game_Parser(files[i])
         all_features += features
         all_labels += labels
-    randomized_game_index = np.random.permutation(num_games)
-    num_test = int(test_percent * num_games)
-    num_val = int(val_percent * num_games)
+    randomized_game_index = np.random.permutation(len(all_features))
+    num_test = int(test_percent * len(all_features))
+    num_val = int(val_percent * len(all_features))
     x_test = np.array(all_features)[randomized_game_index[:num_test]]
     y_test = np.array(all_labels)[randomized_game_index[:num_test]]
     x_val = np.array(all_features)[randomized_game_index[num_test: num_test+num_val]]

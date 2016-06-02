@@ -7,8 +7,7 @@ def main():
     train_data, val_data, test_data = \
         go_parser.parse_games(10, test_percent=0.2, val_percent=0.2)
 
-    test_for_duplicate_move(train_data)
-
+    test_for_duplicate_move(val_data)
 
 def test_for_duplicate_move(data):
     """ test for data correctness by asserting that a new stone
