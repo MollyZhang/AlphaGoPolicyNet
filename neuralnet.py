@@ -1,7 +1,12 @@
 import pandas as pd
+import numpy as np
+import theano
+import theano.tensor as T
+
 import go_parser
 import network3
 from network3 import Network
+from network3 import ConvPoolLayer, FullyConnectedLayer, SoftmaxLayer
 
 import gzip, cPickle
 import datetime
@@ -9,12 +14,25 @@ import tensorflow as tf
 
 
 
-def main():
-    train_data, val_data, test_data = \
-        go_parser.parse_games(1000, test_percent=0.2, val_percent=0.2)
 
-    print train_data[0].shape
-    print train_data[1].shape
+
+def main():
+    mini_batch_size = 10
+    train_data, val_data, test_data = go_parser.parse_games(1000, test_percent=0.2, val_percent=0.2)
+    net = Network([
+        FullyConnectedLayer(n_in=361, n_out=100),
+        SoftmaxLayer(n_in=100, n_out=361)], mini_batch_size)
+    net.SGD(shared(train_data), 50, mini_batch_size, 0.1, shared(val_data), shared(test_data))
+
+
+
+def shared(data):
+    """Place the data into shared variables.  This allows Theano to copy
+    the data to the GPU, if one is available.
+    """
+    shared_x = theano.shared(np.asarray(data[0], dtype=theano.config.floatX), borrow=True)
+    shared_y = theano.shared(np.asarray(data[1], dtype=theano.config.floatX), borrow=True)
+    return shared_x, T.cast(shared_y, "int32")
 
 
 def comparing_data_loading_time():
