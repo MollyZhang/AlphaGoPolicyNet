@@ -40,7 +40,10 @@ def parse_games(num_games, test_percent=0.2, val_percent=0.2):
     y_val = np.array(all_labels)[randomized_game_index[num_test: num_test+num_val]]
     x_train = np.array(all_features)[randomized_game_index[num_test+num_val:]]
     y_train = np.array(all_labels)[randomized_game_index[num_test+num_val:]]
-    return x_train, x_val, x_test, y_train, y_val, y_test
+    train_data = (x_train, y_train)
+    val_data = (x_val, y_val)
+    test_data = (x_test, y_test)
+    return train_data, val_data, test_data
 
 
 def get_game_files(num_games="All"):
