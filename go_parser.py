@@ -27,7 +27,7 @@ def parse_games(num_games, test_percent=0.2, val_percent=0.2):
     all_features = []
     all_labels = []
     for i in range(len(files)):
-        if i%10==0: print "parsing game", i
+        print "parsing game", i, files[i]
         features, labels = Game_Parser(files[i])
         all_features += features
         all_labels += labels
@@ -101,6 +101,11 @@ def map_2d_to_1d(labels):
     I convert the label tuples (19x19 possible values) to a 1d array of lenght 19*19=361
     counted in the row-first-column-scecond order """
     return [label[0]*19+label[1] for label in labels]
+
+def map_1d_to_2d(labels):
+    """the reversion of 1d label to 2d tuple label"""
+    return [(label/19, label%19) for label in labels]
+
 
 def universalize_stones(positions, moves):
     features = []
