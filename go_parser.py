@@ -91,9 +91,16 @@ def Game_Parser(gamefile):
     # universally call the stones "my stones" and "oponent's stones"
     features, labels = universalize_stones(board_positions, next_moves)
     labels = [tuple((move[1], move[0])) for move in labels] # swtich column and row for future convenience
+    oneD_labels = map_2d_to_1d(labels)
 
-    assert(len(features) == len(labels))
-    return features, labels
+    assert(len(features) == len(oneD_labels))
+    return features, oneD_labels
+
+def map_2d_to_1d(labels):
+    """labels are tuples, which is hard to use as part of neural net, therefore
+    I convert the label tuples (19x19 possible values) to a 1d array of lenght 19*19=361
+    counted in the row-first-column-scecond order """
+    return [label[0]*19+label[1] for label in labels]
 
 def universalize_stones(positions, moves):
     features = []
