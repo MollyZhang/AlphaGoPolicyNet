@@ -24,8 +24,8 @@ def basic_softmax_NN():
     mini_batch_size = 10
     train_data, val_data, test_data = go_parser.parse_games(1000, test_percent=0.2, val_percent=0.2)
     net = Network([
-        FullyConnectedLayer(n_in=361, n_out=100),
-        SoftmaxLayer(n_in=100, n_out=361)], mini_batch_size)
+        FullyConnectedLayer(n_in=361, n_out=200),
+        SoftmaxLayer(n_in=200, n_out=361)], mini_batch_size)
     net.SGD(shared(train_data), 50, mini_batch_size, 0.1, shared(val_data), shared(test_data))
 
 def shared(data):
