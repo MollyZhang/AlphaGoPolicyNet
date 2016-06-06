@@ -80,7 +80,8 @@ def parse_games(num_games=1000, test_percent=0.2, val_percent=0.2, onehot=False)
     all_features = []
     all_labels = []
     for i in range(len(files)):
-        print "parsing game", i, files[i]
+        if i%1000==0:
+	    print "parsing game", i, files[i]
         features, labels = Game_Parser(files[i])
         all_features += features
         all_labels += labels
