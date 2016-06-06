@@ -75,14 +75,15 @@ class DataSet(object):
         return self._features[start:end], self._labels[start:end]
 
 
-def parse_games(num_games=1000, test_percent=0.2, val_percent=0.2, onehot=False):
+def parse_games(num_games=1000, first_n_moves=10,
+                test_percent=0.2, val_percent=0.2, onehot=False):
     files = get_game_files(num_games=num_games)
     all_features = []
     all_labels = []
     for i in range(len(files)):
         if i%1000==0:
 	    print "parsing game", i, files[i]
-        features, labels = Game_Parser(files[i])
+        features, labels = Game_Parser(files[i], first_n_moves)
         all_features += features
         all_labels += labels
     randomized_game_index = np.random.permutation(len(all_features))
@@ -127,7 +128,7 @@ def get_game_files(num_games="All"):
         return np.array(game_files)[np.random.permutation(NUM_GAMES)[:num_games]]
 
 
-def Game_Parser(gamefile):
+def Game_Parser(gamefile,first_n_moves):
     """take a game in SGF format and convert it to 2 lists:
     first list: 2d matrix of 19 x 19, the shape of board at any given time (features)
     second list: the position of next move at any given time (label)
