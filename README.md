@@ -13,5 +13,9 @@ At any given time in a game, what's a good next move? I attempt to answer this b
 
 The accuracy of a random guess is somewhere between 0.28% to 1%, averaging 0.41%. 
 
+06/01/2016
 My first try at the problem: with a fully connected network at 361x100x361 with 100 neurons in the one hidden layer, trained for 60 epoch without parameter tuning, I got a 2.5% accuracy. 
 
+
+06/05/2016
+with a softmax network at 361x361 with no hidden layer, trained for 60 epoch without parameter tuning, I got a 3.5% validation accuracy. 
