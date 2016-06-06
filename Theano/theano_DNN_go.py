@@ -3,7 +3,7 @@ import numpy as np
 import theano
 import theano.tensor as T
 
-import go_parser
+import go_parser_theano as go_parser
 import network3
 from network3 import Network
 from network3 import ConvPoolLayer, FullyConnectedLayer, SoftmaxLayer
@@ -19,7 +19,7 @@ def main():
 def basic_softmax_NN():
     mini_batch_size = 10
     train_data, val_data, test_data = go_parser.parse_games(
-        1000, test_percent=0.2, val_percent=0.2, onehot=False, lib="theano")
+        1000, test_percent=0.2, val_percent=0.2, onehot=False)
     net = Network([
         # FullyConnectedLayer(n_in=361, n_out=200),
         SoftmaxLayer(n_in=361, n_out=361)], mini_batch_size)
@@ -49,7 +49,7 @@ def comparing_data_loading_time():
 
     t3 = datetime.datetime.now()
     train_data, val_data, test_data = \
-        go_parser.parse_games(1000, test_percent=0.2, val_percent=0.2)
+        go_parser_theano.parse_games(1000, test_percent=0.2, val_percent=0.2)
     t4 = datetime.datetime.now()
     t_delta2 = t4-t3
     print "time using cPickle: ", t_delta1
@@ -59,7 +59,7 @@ def comparing_data_loading_time():
 def save_data_sample():
     num_games = 1000
     train_data, val_data, test_data = \
-        go_parser.parse_games(num_games, test_percent=0.2, val_percent=0.2)
+        go_parser_theano.parse_games(num_games, test_percent=0.2, val_percent=0.2)
     f = gzip.open('Sample_data/1000_games.pkl.gz', "wb")
     cPickle.dump([train_data, val_data, test_data], f)
     f.close()
@@ -74,7 +74,7 @@ def test_for_duplicate_move(data):
     """ test for data correctness by asserting that a new stone
     has to be placed at an empty position on board """
     x = data[0]
-    y = go_parser.map_1d_to_2d(data[1])
+    y = go_parser_theano.map_1d_to_2d(data[1])
 
     for i in range(len(x)):
         print pd.DataFrame(x[i])
