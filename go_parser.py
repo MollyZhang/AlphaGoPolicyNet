@@ -22,7 +22,7 @@ ROWS = [chr(ord('a') + i) for i in range(19)]
 
 
 
-def parse_games(num_games, test_percent=0.2, val_percent=0.2):
+def parse_games(num_games, test_percent=0.2, val_percent=0.2, onehot=False):
     files = get_game_files(num_games=num_games)
     all_features = []
     all_labels = []
@@ -40,14 +40,28 @@ def parse_games(num_games, test_percent=0.2, val_percent=0.2):
     y_val = np.array(all_labels)[randomized_game_index[num_test: num_test+num_val]]
     x_train = np.array(all_features)[randomized_game_index[num_test+num_val:]]
     y_train = np.array(all_labels)[randomized_game_index[num_test+num_val:]]
+
+    if onehot:
+        y_test = one_hot_encoding(y_test)
+        y_val = one_hot_encoding(y_val)
+        y_train = one_hot_encoding(y_train)
+
     train_data = (x_train, y_train)
     val_data = (x_val, y_val)
     test_data = (x_test, y_test)
     return train_data, val_data, test_data
 
 
+def one_hot_encoding(y):
+    onehot_y = []
+    for each_y in y:
+        vector = [0] * 361
+        vector[each_y] = 1
+        onehot_y.append(vector)
+    return np.array(onehot_y)
+
 def get_game_files(num_games="All"):
-    folders = glob.glob("Database/*")
+    folders = glob.glob("../Database/*")
     game_files = []
     for folder in folders:
         if folder != "Non19x19Boards":

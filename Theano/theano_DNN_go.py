@@ -22,7 +22,8 @@ def main():
 
 def basic_softmax_NN():
     mini_batch_size = 10
-    train_data, val_data, test_data = go_parser.parse_games(1000, test_percent=0.2, val_percent=0.2)
+    train_data, val_data, test_data = go_parser.parse_games(
+        1000, test_percent=0.2, val_percent=0.2, onehot=False)
     net = Network([
         FullyConnectedLayer(n_in=361, n_out=200),
         SoftmaxLayer(n_in=200, n_out=361)], mini_batch_size)
