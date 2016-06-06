@@ -54,15 +54,20 @@ def conv():
     print("test accuracy %g"%accuracy.eval(feed_dict={
         x: go_data.test.features, y_: go_data.test.labels, keep_prob: 1.0}))
 
-
-def basic_softmax_NN():
+def basic_3layer_NN():
     train_data, val_data, test_data = go_parser.parse_games(
-        num_games=1000, onehot=True)
+        num_games=100, onehot=True)
     go_data = go_parser.prepare_data_sets(train_data, val_data, test_data)
 
     x = tf.placeholder(tf.float32, [None, 361])
     W = tf.Variable(tf.zeros([361, 361]))
     b = tf.Variable(tf.zeros([361]))
+    h = tf.nn.relu(tf.matmul(x, W) + b)
+
+    W1 = tf.Variable(tf.zeros([361, 361]))
+    b = tf.Variable(tf.zeros([361]))
+
+
     y = tf.nn.softmax(tf.matmul(x, W) + b)
     y_ = tf.placeholder(tf.float32, [None, 361])
 
@@ -89,6 +94,40 @@ def basic_softmax_NN():
 
 
 
+def basic_softmax_NN():
+    go_data = go_parser.parse_games(num_games=100, onehot=True)
+
+    x = tf.placeholder(tf.float32, [None, 361])
+    W = tf.Variable(tf.zeros([361, 361]))
+    b = tf.Variable(tf.zeros([361]))
+    y = tf.nn.softmax(tf.matmul(x, W) + b)
+    y_ = tf.placeholder(tf.float32, [None, 361])
+
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+    sess = tf.InteractiveSession()
+    sess.run(tf.initialize_all_variables())
+
+    best_accuracy = 0
+    previous_epoch = 0
+
+    while go_data.train.epochs_completed < 50:
+        batch = go_data.train.next_batch(50)
+        if go_data.train.epochs_completed > previous_epoch:
+            previous_epoch = go_data.train.epochs_completed
+            train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1]})
+            val_accuracy = accuracy.eval(feed_dict={
+                x: go_data.validation.features, y_: go_data.validation.labels})
+            print("epoch %d: training accuracy %g, validation accuracy %g" %(
+                previous_epoch, train_accuracy, val_accuracy))
+
+        train_step.run(feed_dict={x: batch[0], y_: batch[1]})
+    test_accuracy = accuracy.eval(feed_dict={
+        x: go_data.test.features, y_: go_data.test.labels})
+    print "test accuracy %f" %test_accuracy
 
 def weight_variable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)

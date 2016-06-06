@@ -104,7 +104,8 @@ def parse_games(num_games=1000, first_n_moves=10,
     train_data = (x_train, y_train)
     val_data = (x_val, y_val)
     test_data = (x_test, y_test)
-    return train_data, val_data, test_data
+    go_data = prepare_data_sets(train_data, val_data, test_data)
+    return go_data
 
 
 def one_hot_encoding(y):
