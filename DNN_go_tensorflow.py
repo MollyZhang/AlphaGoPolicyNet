@@ -17,9 +17,12 @@ def basic_softmax_NN():
     go_data = go_parser.prepare_data_sets(train_data, val_data, test_data)
 
     x = tf.placeholder(tf.float32, [None, 361])
-    W = tf.Variable(tf.zeros([361, 361]))
-    b = tf.Variable(tf.zeros([361]))
-    y = tf.nn.softmax(tf.matmul(x, W) + b)
+    W1 = tf.Variable(tf.zeros([361, 100]))
+    b1 = tf.Variable(tf.zeros([100]))
+    y1 = tf.nn.softmax(tf.matmul(x, W1) + b1)
+    W2 = tf.Variable(tf.zeros([100, 361]))
+    b2 = tf.Variable(tf.zeros([361]))
+    y = tf.nn.softmax(tf.matmul(y1, W2) + b2)
     y_ = tf.placeholder(tf.float32, [None, 361])
 
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
