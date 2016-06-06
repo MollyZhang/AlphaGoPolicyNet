@@ -116,7 +116,7 @@ def basic_softmax_NN():
     previous_epoch = 0
 
     while go_data.train.epochs_completed < 50:
-        batch = go_data.train.next_batch(50)
+        batch = go_data.train.next_batch(500)
         if go_data.train.epochs_completed > previous_epoch:
             previous_epoch = go_data.train.epochs_completed
             train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1]})
