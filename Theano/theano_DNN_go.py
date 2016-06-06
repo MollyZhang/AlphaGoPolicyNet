@@ -12,10 +12,6 @@ import gzip, cPickle
 import datetime
 import tensorflow as tf
 
-
-
-
-
 def main():
     basic_softmax_NN()
 
@@ -25,8 +21,8 @@ def basic_softmax_NN():
     train_data, val_data, test_data = go_parser.parse_games(
         1000, test_percent=0.2, val_percent=0.2, onehot=False)
     net = Network([
-        FullyConnectedLayer(n_in=361, n_out=200),
-        SoftmaxLayer(n_in=200, n_out=361)], mini_batch_size)
+        # FullyConnectedLayer(n_in=361, n_out=200),
+        SoftmaxLayer(n_in=361, n_out=361)], mini_batch_size)
     net.SGD(shared(train_data), 50, mini_batch_size, 0.1, shared(val_data), shared(test_data))
 
 def shared(data):

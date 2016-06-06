@@ -11,6 +11,7 @@ import pandas as pd
 import glob
 import os
 import pickle
+import tensorflow as tf
 
 
 NUM_GAMES = 85931
@@ -20,9 +21,61 @@ STONE_DICT2 = {"Empty": 0, "Me": 1, "Opponent": 2}
 COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
+def prepare_data_sets(train_data, val_data, test_data):
+    class DataSets(object):
+        pass
+    data_sets = DataSets()
+    data_sets.train = DataSet(train_data)
+    data_sets.validation = DataSet(val_data)
+    data_sets.test = DataSet(test_data)
+    return data_sets
 
 
-def parse_games(num_games, test_percent=0.2, val_percent=0.2, onehot=False):
+class DataSet(object):
+    def __init__(self, data):
+        self._num_examples = data[1].shape[0]
+        self._features = data[0]
+        self._labels = data[1]
+        self._epochs_completed = 0
+        self._index_in_epoch = 0
+
+    @property
+    def features(self):
+        return self._features
+
+    @property
+    def labels(self):
+        return self._labels
+
+    @property
+    def num_examples(self):
+        return self._num_examples
+
+    @property
+    def epochs_completed(self):
+        return self._epochs_completed
+
+    def next_batch(self, batch_size):
+        """Return the next `batch_size` examples from this data set."""
+        start = self._index_in_epoch
+        self._index_in_epoch += batch_size
+        if self._index_in_epoch > self._num_examples:
+            # Finished epoch
+            self._epochs_completed += 1
+            # Shuffle the data
+            perm = np.arange(self._num_examples)
+            np.random.shuffle(perm)
+            self._features = self._features[perm]
+            self._labels = self._labels[perm]
+            # Start next epoch
+            start = 0
+            self._index_in_epoch = batch_size
+            assert batch_size <= self._num_examples
+        end = self._index_in_epoch
+        return self._features[start:end], self._labels[start:end]
+
+
+def parse_games(num_games=1000, test_percent=0.2, val_percent=0.2, onehot=False):
     files = get_game_files(num_games=num_games)
     all_features = []
     all_labels = []
@@ -61,7 +114,7 @@ def one_hot_encoding(y):
     return np.array(onehot_y)
 
 def get_game_files(num_games="All"):
-    folders = glob.glob("../Database/*")
+    folders = glob.glob("Database/*")
     game_files = []
     for folder in folders:
         if folder != "Non19x19Boards":
