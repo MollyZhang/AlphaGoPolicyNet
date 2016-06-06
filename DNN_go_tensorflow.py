@@ -3,8 +3,13 @@ import go_parser
 
 
 def main():
+    basic_softmax_NN()
+
+
+
+def basic_softmax_NN():
     train_data, val_data, test_data = go_parser.parse_games(
-        num_games=1000, onehot=True)
+        num_games='All', onehot=True)
     go_data = go_parser.prepare_data_sets(train_data, val_data, test_data)
 
     x = tf.placeholder(tf.float32, [None, 361])
@@ -15,18 +20,21 @@ def main():
 
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
     train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-    init = tf.initialize_all_variables()
-    sess = tf.Session()
-    sess.run(init)
-
-    for i in range(10000):
-        batch_xs, batch_ys = go_data.train.next_batch(100)
-        sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys})
-
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-    print(sess.run(accuracy, feed_dict={x: go_data.test.features, y_: go_data.test.labels}))
+    sess = tf.InteractiveSession()
+    sess.run(tf.initialize_all_variables())
+
+    for i in range(20000):
+        batch = go_data.train.next_batch(50)
+        if i%100 == 0:
+            train_accuracy = sess.run(accuracy, feed_dict={x: batch[0], y_: batch[1]})
+            print("step %d, training accuracy %g"%(i, train_accuracy))
+            train_step.run(feed_dict={x: batch[0], y_: batch[1]})
+    print("test accuracy %g"%sess.run(accuracy, feed_dict={
+        x: go_data.test.features, y_: go_data.test.labels}))
+
 
 
 
