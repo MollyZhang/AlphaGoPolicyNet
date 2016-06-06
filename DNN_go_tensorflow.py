@@ -4,7 +4,7 @@ from datetime import datetime
 
 def main():
     t1 = datetime.now()
-    conv()
+    basic_softmax_NN()
     t2 = datetime.now()
     print "time spent: ", t2-t1
 
@@ -57,18 +57,24 @@ def conv():
 
 def basic_softmax_NN():
     train_data, val_data, test_data = go_parser.parse_games(
-        num_games='All', onehot=True)
+        num_games='1000', onehot=True)
     go_data = go_parser.prepare_data_sets(train_data, val_data, test_data)
 
     x = tf.placeholder(tf.float32, [None, 361])
-    W = tf.Variable(tf.zeros([361, 361]))
-    b = tf.Variable(tf.zeros([361]))
-    y = tf.nn.softmax(tf.matmul(x, W) + b)
+
+    W_fc1 = weight_variable([361, 100])
+    b_fc1 = bias_variable([100])
+
+    y1 = tf.nn.relu(tf.matmul(x, W_fc1) + b_fc1)
+
+    W_fc2 = tf.Variable(tf.zeros([100, 361]))
+    b_fc2 = tf.Variable(tf.zeros([361]))
+    y = tf.nn.softmax(tf.matmul(y1, W_fc2) + b_fc2)
     y_ = tf.placeholder(tf.float32, [None, 361])
 
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
-    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
-    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+    train_step = tf.train.GradientDescentOptimizer(1).minimize(cross_entropy)
+    correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
     sess = tf.InteractiveSession()
