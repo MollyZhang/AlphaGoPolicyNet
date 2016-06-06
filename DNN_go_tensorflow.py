@@ -1,9 +1,13 @@
 import tensorflow as tf
 import go_parser
-
+from datetime import datetime
 
 def main():
+    t1 = datetime.now()
     basic_softmax_NN()
+    t2 = datetime.now()
+
+    print "time spent: ", t2-t1
 
 
 
