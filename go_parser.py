@@ -21,20 +21,29 @@ STONE_DICT2 = {"Empty": 0, "Me": 1, "Opponent": 2}
 COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
-def prepare_data_sets(train_data, val_data, test_data):
+def prepare_data_sets(train_data, val_data, test_data, dtype=tf.float32):
     class DataSets(object):
         pass
     data_sets = DataSets()
-    data_sets.train = DataSet(train_data)
-    data_sets.validation = DataSet(val_data)
-    data_sets.test = DataSet(test_data)
+    data_sets.train = DataSet(train_data, dtype=dtype)
+    data_sets.validation = DataSet(val_data, dtype=dtype)
+    data_sets.test = DataSet(test_data, dtype=dtype)
     return data_sets
 
 
 class DataSet(object):
-    def __init__(self, data):
+    def __init__(self, data, dtype=tf.float32):
+        """`dtype` can be either `uint8` to leave the input as `[0, 1, 2]`,
+        or `float32` to rescale into `[0, 1]`."""
+        dtype = tf.as_dtype(dtype).base_dtype
+        if dtype not in (tf.uint8, tf.float32):
+            raise TypeError('Invalid image dtype %r, expected uint8 or float32' %dtype)
+        if dtype == tf.float32:
+            # Convert from [0, 1, 2] -> [0.0, 1.0].
+            features = data[0].astype(np.float32)
+            features = np.multiply(features, 1.0 / 2.0)
         self._num_examples = data[1].shape[0]
-        self._features = data[0]
+        self._features = features
         self._labels = data[1]
         self._epochs_completed = 0
         self._index_in_epoch = 0

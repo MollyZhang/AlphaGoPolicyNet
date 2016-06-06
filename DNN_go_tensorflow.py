@@ -1,4 +1,5 @@
 import tensorflow as tf
+import copy
 import go_parser
 from datetime import datetime
 
@@ -123,6 +124,9 @@ def basic_softmax_NN():
                 x: go_data.validation.features, y_: go_data.validation.labels})
             print("epoch %d: training accuracy %g, validation accuracy %g" %(
                 previous_epoch, train_accuracy, val_accuracy))
+            if val_accuracy > best_accuracy:
+                print "best accuracy"
+                best_accuracy = copy.deepcopy(val_accuracy)
 
         train_step.run(feed_dict={x: batch[0], y_: batch[1]})
     test_accuracy = accuracy.eval(feed_dict={
