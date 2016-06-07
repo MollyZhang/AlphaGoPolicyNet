@@ -1,4 +1,4 @@
-# AlphaGoValueNet
+# AlphaGoPolicyNet
 Implementing the value network of Alpha Go as the class project of the deep learning class in UCSC. 
 
 AlphaGo Paper: http://www.nature.com/nature/journal/v529/n7587/full/nature16961.html
@@ -14,7 +14,7 @@ At any given time in a game, what's a good next move? I attempt to answer this b
 The accuracy of a random guess is somewhere between 0.28% to 1%, averaging 0.41%. 
 
 ####06/01/2016
-My first try at the problem: with a fully connected network at 361x100x361 with 100 neurons in the one hidden layer, trained for 60 epoch without parameter tuning, I got a 2.5% accuracy. 
+My first try at the problem: with a fully connected network at 361x100x361 with 100 neurons in the one hidden layer, trained for 60 epoch with 1000 games without parameter tuning, I got a 2.5% accuracy. 
 
 
 ####06/05/2016
@@ -22,3 +22,4 @@ with a softmax network at 361x361 with no hidden layer and 1000 games, trained f
 
 ####06/06/2016
 with network at 361x361x361 with 3000 games, I got a higher 4.0% accuracy
+During this whole time the convolutional netork has worse performance than simple vanilla neural network with one hidden layer, possiblity because convolutional net is harder to train
