@@ -168,6 +168,9 @@ def Game_Parser(gamefile,first_n_moves):
     all_moves = filter(None, all_moves)  # remove empty string in list
 
     for move in all_moves:
+        steps_taken = count_steps_taken(board_positions[-1])
+        if steps_taken >= first_n_moves:
+            break
         if "[tt]" in move:
             continue
         next_moves.append(parse_move(move))
@@ -189,6 +192,12 @@ def Game_Parser(gamefile,first_n_moves):
 
     assert(len(features) == len(oneD_labels))
     return oneD_features, oneD_labels
+
+
+def count_steps_taken(board):
+    copy_of_board = np.array(board, copy=True)
+    copy_of_board[copy_of_board == 2] = 1
+    return int(np.sum(copy_of_board))
 
 def map_2d_to_1d(datas, data_type):
     """labels are tuples, which is hard to use as part of neural net, therefore
@@ -307,3 +316,16 @@ def add_starting_stones(start_positions, line):
         row = ord(p[1]) - ord('a')
         start_positions[row][column] = STONE_DICT[line[1]]
     return start_positions
+
+def count_games_with_starting_stones():
+    """result: 5192 games have starting stones
+    """
+    files = get_game_files(num_games='All')
+    num = 0
+    for gamefile in files:
+        f = open(gamefile, "r")
+        for line in f:
+            if line[0:3] == "AB[" or line[0:3] == "AW[":
+                num += 1
+                break
+    return num

@@ -5,13 +5,13 @@ from datetime import datetime
 
 def main():
     t1 = datetime.now()
-    conv()
+    basic_3layer_NN()
     t2 = datetime.now()
     print "time spent: ", t2-t1
 
 
 def conv(num_games=100, epoch=50, batch_size=500,
-         learning_rate=1.0, drop_out_rate=0.2,
+         learning_rate=3e-4, drop_out_rate=0.2,
          conv_patch_size=6, conv_features=10):
     go_data = go_parser.parse_games(num_games=num_games, onehot=True)
     sess = tf.InteractiveSession()
@@ -40,7 +40,7 @@ def conv(num_games=100, epoch=50, batch_size=500,
     y_conv=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
-    train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
+    train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
     correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     sess.run(tf.initialize_all_variables())
@@ -67,12 +67,12 @@ def conv(num_games=100, epoch=50, batch_size=500,
     print "test accuracy %f" % test_accuracy
 
 
-def basic_3layer_NN(num_games=100,
+def basic_3layer_NN(num_games='All',
                     epoch=50, batch_size=500,
                     learning_rate=1.0,
                     hidden_layer_num=361,
                     drop_out_rate=0.2):
-    go_data = go_parser.parse_games(num_games=num_games, onehot=True)
+    go_data = go_parser.parse_games(num_games=num_games, first_n_moves=2, onehot=True)
     x = tf.placeholder(tf.float32, [None, 361])
 
     W1 = weight_variable([361, hidden_layer_num])
