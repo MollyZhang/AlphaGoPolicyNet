@@ -1,19 +1,22 @@
 import tensorflow as tf
+import pandas as pd
+import numpy as np
 import copy
 import go_parser
 from datetime import datetime
 
 def main():
     t1 = datetime.now()
-    basic_3layer_NN()
+    basic_3layer_NN(num_games='All', first_n=1, epoch=5)
     t2 = datetime.now()
     print "time spent: ", t2-t1
 
 
-def conv(num_games=100, epoch=50, batch_size=500,
+def conv(num_games='All', epoch=50, batch_size=500,
          learning_rate=3e-4, drop_out_rate=0.2,
          conv_patch_size=6, conv_features=10):
-    go_data = go_parser.parse_games(num_games=num_games, onehot=True)
+    go_data = go_parser.parse_games(num_games=num_games, first_n_moves=10, onehot=True)
+
     sess = tf.InteractiveSession()
 
     x = tf.placeholder(tf.float32, shape=[None, 361])
@@ -67,12 +70,13 @@ def conv(num_games=100, epoch=50, batch_size=500,
     print "test accuracy %f" % test_accuracy
 
 
-def basic_3layer_NN(num_games='All',
+def basic_3layer_NN(modelfile=False, num_games='All',
+                    first_n = 10,
                     epoch=50, batch_size=500,
                     learning_rate=1.0,
                     hidden_layer_num=361,
                     drop_out_rate=0.2):
-    go_data = go_parser.parse_games(num_games=num_games, first_n_moves=2, onehot=True)
+    go_data = go_parser.parse_games(num_games=num_games, first_n_moves=first_n, onehot=True)
     x = tf.placeholder(tf.float32, [None, 361])
 
     W1 = weight_variable([361, hidden_layer_num])
@@ -97,6 +101,8 @@ def basic_3layer_NN(num_games='All',
 
     sess = tf.InteractiveSession()
     sess.run(tf.initialize_all_variables())
+    saver = tf.train.Saver()
+
 
     best_accuracy = 0
     previous_epoch = 0
@@ -119,6 +125,25 @@ def basic_3layer_NN(num_games='All',
         x: go_data.test.features, y_: go_data.test.labels, keep_prob:1})
     print "test accuracy %f" % test_accuracy
 
+    if modelfile:
+        saver.save(sess, modelfile)
+
+    probabilities = y
+    for i in range(2):
+        board = [go_data.test.features[i]]
+        move = [go_data.test.labels[i]]
+        feed_dict = {x: board, y_: move, keep_prob: 1.0}
+        prob = probabilities.eval(feed_dict=feed_dict, session=sess)
+
+        print "board:"
+        print pd.DataFrame(np.array(board).reshape((19, 19)))
+        print "move"
+        print pd.DataFrame(np.array(move).reshape((19, 19)))
+        print "probabilities"
+        print pd.DataFrame(np.array(prob).reshape((19, 19)))
+
+
+    return test_accuracy
 
 
 def basic_softmax_NN():
