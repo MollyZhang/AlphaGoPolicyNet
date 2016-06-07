@@ -22,4 +22,5 @@ with a softmax network at 361x361 with no hidden layer and 1000 games, trained f
 
 ####06/06/2016
 with network at 361x361x361 with 3000 games, I got a higher 4.0% accuracy
+
 During this whole time the convolutional netork has worse performance than simple vanilla neural network with one hidden layer, possiblity because convolutional net is harder to train
