@@ -85,14 +85,18 @@ class DataSet(object):
 
 
 def parse_games(num_games=1000, first_n_moves=10,
-                test_percent=0.2, val_percent=0.2, onehot=False, lib="tensorflow"):
+                test_percent=0.2, val_percent=0.2, onehot=False,
+                lib="tensorflow", move_only=False):
+
     files = get_game_files(num_games=num_games, lib=lib)
     all_features = []
     all_labels = []
     for i in range(len(files)):
         if i % 1000 == 0:
             print "parsing game", i, files[i]
-        features, labels, dummy1, dummy2 = Game_Parser(files[i], first_n_moves)
+        features, labels, dummy1, dummy2 = Game_Parser(files[i],
+                                                       first_n_moves,
+                                                       move_only)
         all_features += features
         all_labels += labels
     randomized_game_index = np.random.permutation(len(all_features))
@@ -120,7 +124,6 @@ def parse_games(num_games=1000, first_n_moves=10,
         return train_data, val_data, test_data
 
 
-
 def one_hot_encoding(y):
     onehot_y = []
     for each_y in y:
@@ -145,7 +148,7 @@ def get_game_files(num_games="All", lib="tensorflow"):
         return np.array(game_files)[np.random.permutation(NUM_GAMES)[:num_games]]
 
 
-def Game_Parser(gamefile,first_n_moves):
+def Game_Parser(gamefile,first_n_moves, move_only=False):
     """take a game in SGF format and convert it to 2 lists:
     first list: 2d matrix of 19 x 19, the shape of board at any given time (features)
     second list: the position of next move at any given time (label)
@@ -167,6 +170,9 @@ def Game_Parser(gamefile,first_n_moves):
     for move in all_moves:
         steps_taken = count_steps_taken(board_positions[-1])
         if steps_taken >= first_n_moves:
+            if move_only:
+                board_positions = [board_positions[-1]]
+                next_moves = [next_moves[-1]]
             break
         if "[tt]" in move:
             continue
@@ -176,7 +182,8 @@ def Game_Parser(gamefile,first_n_moves):
         board_positions.append(new_board_position)
 
     # remove last board position because there is no new moves
-    board_positions.pop(-1)
+    if not move_only:
+        board_positions.pop(-1)
     # stop distingush between black and white stone by
     # universally call the stones "my stones" and "oponent's stones"
     features, labels = universalize_stones(board_positions, next_moves)
