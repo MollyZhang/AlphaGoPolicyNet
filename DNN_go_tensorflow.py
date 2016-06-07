@@ -7,14 +7,15 @@ import go_parser
 from datetime import datetime
 
 def main():
-    probs = {}
-    for n in [10, 100, 1000, 10000, 'All']:
-        probs[n] = basic_3layer_NN(num_games=n, first_n=1, epoch=5)
+    prob, board, move = basic_3layer_NN(
+        num_games=1000, first_n=10, epoch=20, move_only=True)
+    print board.reshape((19, 19))
+    print move.reshape((19, 19))
+    print prob.reshape((19, 19))
 
-    with open("probabilitiy_of_open_game", "w") as f:
-        f.write(pickle.dumps(probs))
+    with open("probability_10_step", "w") as f:
+        f.write(pickle.dumps([prob, board, move]))
         f.close()
-
 
 
 def conv(num_games='All', epoch=50, batch_size=500,
@@ -80,10 +81,12 @@ def basic_3layer_NN(modelfile=False, num_games='All',
                     epoch=50, batch_size=500,
                     learning_rate=1.0,
                     hidden_layer_num=361,
-                    drop_out_rate=0.2):
-    go_data = go_parser.parse_games(num_games=num_games, first_n_moves=first_n, onehot=True)
-    x = tf.placeholder(tf.float32, [None, 361])
+                    drop_out_rate=0.2,
+                    move_only=False):
+    go_data = go_parser.parse_games(num_games=num_games, first_n_moves=first_n,
+                                    move_only=move_only, onehot=True)
 
+    x = tf.placeholder(tf.float32, [None, 361])
     W1 = weight_variable([361, hidden_layer_num])
     b1 = bias_variable([hidden_layer_num])
     y1 = tf.nn.relu(tf.matmul(x, W1) + b1)
@@ -139,14 +142,14 @@ def basic_3layer_NN(modelfile=False, num_games='All',
     feed_dict = {x: board, y_: move, keep_prob: 1.0}
     prob = probabilities.eval(feed_dict=feed_dict, session=sess)
 
-    print "board:"
-    print pd.DataFrame(np.array(board).reshape((19, 19)))
-    print "move"
-    print pd.DataFrame(np.array(move).reshape((19, 19)))
-    print "probabilities"
-    print pd.DataFrame(np.array(prob).reshape((19, 19)))
+    # print "board:"
+    # print pd.DataFrame(np.array(board).reshape((19, 19)))
+    # print "move"
+    # print pd.DataFrame(np.array(move).reshape((19, 19)))
+    # print "probabilities"
+    # print pd.DataFrame(np.array(prob).reshape((19, 19)))
 
-    return np.array(prob).reshape((19, 19))
+    return prob, board, move
 
 def basic_softmax_NN():
     go_data = go_parser.parse_games(num_games=100, onehot=True)

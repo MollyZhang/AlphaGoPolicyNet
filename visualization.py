@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 
 def draw_board(stones, probs):
@@ -26,22 +27,21 @@ def draw_board(stones, probs):
     ax.set_ylim(-1,19)
 
     for stone in stones:
+        print stone
         s1, = ax.plot(stone[1], 18-stone[0], 'o',markersize=28,
-                      markeredgecolor=(0,0,0), markerfacecolor='w', markeredgewidth=2)
+                      markeredgecolor=(0,0,0), markerfacecolor='k', markeredgewidth=2)
 
-    #plot probabilities of each stone
-    max_color = np.amax(probs)
+    #scale probabilities so that they look good of each stone
+    Scaler = MinMaxScaler()
+    new_probs = Scaler.fit_transform(np.log(probs))
+    new_probs = new_probs/np.amax(new_probs)
+
     for i in range(0, 19):
         for j in range(0, 19):
             stone = (i, j)
-            transparency = probs[stone]/max_color
-            s, = ax.plot(stone[1], 18-stone[0], 'o',markersize=28,
-                color=(0.75, 0, 0.75, transparency), markeredgewidth=0)
-
-
-
-
-
+            transparency = new_probs[stone]
+            s, = ax.plot(stone[1], 18-stone[0], 'o', markersize=28,
+                color = (0.75, 0, 0.75, transparency), markeredgewidth=0)
 
 
 
