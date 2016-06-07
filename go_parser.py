@@ -82,7 +82,6 @@ class DataSet(object):
             # Start next epoch
             start = 0
             self._index_in_epoch = batch_size
-            assert batch_size <= self._num_examples
         end = self._index_in_epoch
         return self._features[start:end], self._labels[start:end]
 
@@ -95,7 +94,7 @@ def parse_games(num_games=1000, first_n_moves=10,
     for i in range(len(files)):
         if i % 1000 == 0:
             print "parsing game", i, files[i]
-        features, labels = Game_Parser(files[i], first_n_moves)
+        features, labels, dummy1, dummy2 = Game_Parser(files[i], first_n_moves)
         all_features += features
         all_labels += labels
     randomized_game_index = np.random.permutation(len(all_features))
@@ -191,7 +190,7 @@ def Game_Parser(gamefile,first_n_moves):
 
 
     assert(len(features) == len(oneD_labels))
-    return oneD_features, oneD_labels
+    return oneD_features, oneD_labels, features, labels
 
 
 def count_steps_taken(board):

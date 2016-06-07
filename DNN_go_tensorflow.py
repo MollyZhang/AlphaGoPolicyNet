@@ -1,15 +1,20 @@
 import tensorflow as tf
 import pandas as pd
 import numpy as np
+import pickle
 import copy
 import go_parser
 from datetime import datetime
 
 def main():
-    t1 = datetime.now()
-    basic_3layer_NN(num_games='All', first_n=1, epoch=5)
-    t2 = datetime.now()
-    print "time spent: ", t2-t1
+    probs = {}
+    for n in [10, 100, 1000, 10000, 'All']:
+        probs[n] = basic_3layer_NN(num_games=n, first_n=1, epoch=5)
+
+    with open("probabilitiy_of_open_game", "w") as f:
+        f.write(pickle.dumps(probs))
+        f.close()
+
 
 
 def conv(num_games='All', epoch=50, batch_size=500,
@@ -129,22 +134,19 @@ def basic_3layer_NN(modelfile=False, num_games='All',
         saver.save(sess, modelfile)
 
     probabilities = y
-    for i in range(2):
-        board = [go_data.test.features[i]]
-        move = [go_data.test.labels[i]]
-        feed_dict = {x: board, y_: move, keep_prob: 1.0}
-        prob = probabilities.eval(feed_dict=feed_dict, session=sess)
+    board = [go_data.test.features[0]]
+    move = [go_data.test.labels[0]]
+    feed_dict = {x: board, y_: move, keep_prob: 1.0}
+    prob = probabilities.eval(feed_dict=feed_dict, session=sess)
 
-        print "board:"
-        print pd.DataFrame(np.array(board).reshape((19, 19)))
-        print "move"
-        print pd.DataFrame(np.array(move).reshape((19, 19)))
-        print "probabilities"
-        print pd.DataFrame(np.array(prob).reshape((19, 19)))
+    print "board:"
+    print pd.DataFrame(np.array(board).reshape((19, 19)))
+    print "move"
+    print pd.DataFrame(np.array(move).reshape((19, 19)))
+    print "probabilities"
+    print pd.DataFrame(np.array(prob).reshape((19, 19)))
 
-
-    return test_accuracy
-
+    return np.array(prob).reshape((19, 19))
 
 def basic_softmax_NN():
     go_data = go_parser.parse_games(num_games=100, onehot=True)
