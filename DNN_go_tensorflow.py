@@ -5,28 +5,28 @@ from datetime import datetime
 
 def main():
     t1 = datetime.now()
-    basic_3layer_NN()
+    conv()
     t2 = datetime.now()
     print "time spent: ", t2-t1
 
 
-def conv():
-    train_data, val_data, test_data = go_parser.parse_games(
-        num_games=1000, onehot=True)
-    go_data = go_parser.prepare_data_sets(train_data, val_data, test_data)
+def conv(num_games=100, epoch=50, batch_size=500,
+         learning_rate=1.0, drop_out_rate=0.2,
+         conv_patch_size=6, conv_features=10):
+    go_data = go_parser.parse_games(num_games=num_games, onehot=True)
     sess = tf.InteractiveSession()
 
     x = tf.placeholder(tf.float32, shape=[None, 361])
     y_ = tf.placeholder(tf.float32, shape=[None, 361])
 
-    W_conv1 = weight_variable([8, 8, 1, 10])
+    W_conv1 = weight_variable([conv_patch_size, conv_patch_size, 1, conv_features])
     b_conv1 = bias_variable([10])
     x_board = tf.reshape(x, [-1, 19, 19, 1])
 
     h_conv1 = tf.nn.relu(conv2d(x_board, W_conv1) + b_conv1)
 
-    W_fc1 = weight_variable([19 * 19 * 10, 1024])
-    b_fc1 = bias_variable([1024])
+    W_fc1 = weight_variable([19 * 19 * 10, 361])
+    b_fc1 = bias_variable([361])
 
     h_pool2_flat = tf.reshape(h_conv1, [-1, 19*19*10])
     h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
@@ -34,7 +34,7 @@ def conv():
     keep_prob = tf.placeholder(tf.float32)
     h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-    W_fc2 = weight_variable([1024, 361])
+    W_fc2 = weight_variable([361, 361])
     b_fc2 = bias_variable([361])
 
     y_conv=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
@@ -44,24 +44,37 @@ def conv():
     correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     sess.run(tf.initialize_all_variables())
-    for i in range(20000):
-        batch = go_data.train.next_batch(50)
-        if i%100 == 0:
-            train_accuracy = accuracy.eval(feed_dict={
-                x:batch[0], y_: batch[1], keep_prob: 1.0})
-            print("step %d, training accuracy %g"%(i, train_accuracy))
-        train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
 
-    print("test accuracy %g"%accuracy.eval(feed_dict={
-        x: go_data.test.features, y_: go_data.test.labels, keep_prob: 1.0}))
+    best_accuracy = 0
+    previous_epoch = 0
+    while go_data.train.epochs_completed < epoch:
+        batch = go_data.train.next_batch(batch_size)
+        if go_data.train.epochs_completed > previous_epoch:
+            previous_epoch = go_data.train.epochs_completed
+            train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1], keep_prob:1.0})
+            val_accuracy = accuracy.eval(feed_dict={
+                x: go_data.validation.features, y_: go_data.validation.labels, keep_prob:1.0})
+            print("epoch %d: training accuracy %g, validation accuracy %g" %(
+                previous_epoch, train_accuracy, val_accuracy))
+            if val_accuracy > best_accuracy:
+                print "best accuracy"
+                best_accuracy = copy.deepcopy(val_accuracy)
+
+        train_step.run(feed_dict={
+            x: batch[0], y_: batch[1], keep_prob:(1-drop_out_rate)})
+    test_accuracy = accuracy.eval(feed_dict={
+        x: go_data.test.features, y_: go_data.test.labels, keep_prob:1})
+    print "test accuracy %f" % test_accuracy
+
 
 def basic_3layer_NN(num_games=100,
-                    epoch=100, batch_size=500,
+                    epoch=50, batch_size=500,
                     learning_rate=1.0,
                     hidden_layer_num=361,
-                    drop_out_rate=0.5):
+                    drop_out_rate=0.2):
     go_data = go_parser.parse_games(num_games=num_games, onehot=True)
     x = tf.placeholder(tf.float32, [None, 361])
+
     W1 = weight_variable([361, hidden_layer_num])
     b1 = bias_variable([hidden_layer_num])
     y1 = tf.nn.relu(tf.matmul(x, W1) + b1)
@@ -87,7 +100,6 @@ def basic_3layer_NN(num_games=100,
 
     best_accuracy = 0
     previous_epoch = 0
-
     while go_data.train.epochs_completed < epoch:
         batch = go_data.train.next_batch(batch_size)
         if go_data.train.epochs_completed > previous_epoch:
