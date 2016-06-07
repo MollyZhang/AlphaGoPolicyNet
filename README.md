@@ -1,18 +1,19 @@
 # AlphaGoPolicyNet
-Implementing the value network of Alpha Go as the class project of the deep learning class in UCSC. 
+Implementing the policy network of AlphaGo as the class project of the deep learning class in UCSC. 
 
 AlphaGo Paper: http://www.nature.com/nature/journal/v529/n7587/full/nature16961.html
+
 Convolutional Net to train Go game paper: https://arxiv.org/pdf/1412.3409.pdf
 
 Total Number of Professional Games Downloaded: 85931
 
 Total Number of Training Samples: 17,801,121 (average 207 steps in each game)
 
-The goal of the project is as following:
+####The goal of the project is as following:
 
 At any given time in a game, what's a good next move? I attempt to answer this by looking at moves of professional players. I fed the 17 million professional moves at a known board to a neural network, and try predict what's the best move given a new board. 
 
-The accuracy of a random guess is somewhere between 0.28% to 1%, averaging 0.41%. 
+Note: The accuracy of a random guess is on average 0.41%. 
 
 ####06/01/2016
 My first try at the problem: with a fully connected network at 361x100x361 with 100 neurons in the one hidden layer, trained for 60 epoch with 1000 games without parameter tuning, I got a 2.5% accuracy. 
