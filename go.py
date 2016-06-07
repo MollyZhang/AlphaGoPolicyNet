@@ -6,6 +6,7 @@ import pickle
 #my scripts
 import go_parser as gp
 import DNN_go_tensorflow as dnn_go
+import visualization as vz
 
 
 def main():
@@ -15,8 +16,7 @@ def main():
         f.close()
     example_open_moves = go_data.train.labels
 
-
-    print probs[100]
+    vz.draw_board(gp.map_1d_to_2d(example_open_moves[:5]), probs['All'])
 
 
 

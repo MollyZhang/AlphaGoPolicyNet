@@ -42,12 +42,10 @@ class DataSet(object):
             # Convert from [0, 1, 2] -> [0.0, 0.5, 1.0].
             features = data[0].astype(np.float32)
             features = np.multiply(features, 1.0 / 2.0)
-            labels = data[1].astype(np.float32)
-            labels = np.multiply(labels, 1.0 / 1.0)
 
         self._num_examples = data[1].shape[0]
         self._features = features
-        self._labels = labels
+        self._labels = data[1]
         self._epochs_completed = 0
         self._index_in_epoch = 0
 
