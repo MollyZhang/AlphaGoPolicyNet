@@ -5,7 +5,7 @@ from datetime import datetime
 
 def main():
     t1 = datetime.now()
-    basic_softmax_NN()
+    basic_3layer_NN()
     t2 = datetime.now()
     print "time spent: ", t2-t1
 
@@ -55,43 +55,57 @@ def conv():
     print("test accuracy %g"%accuracy.eval(feed_dict={
         x: go_data.test.features, y_: go_data.test.labels, keep_prob: 1.0}))
 
-def basic_3layer_NN():
-    train_data, val_data, test_data = go_parser.parse_games(
-        num_games=100, onehot=True)
-    go_data = go_parser.prepare_data_sets(train_data, val_data, test_data)
-
+def basic_3layer_NN(num_games=100,
+                    epoch=100, batch_size=500,
+                    learning_rate=1.0,
+                    hidden_layer_num=361,
+                    drop_out_rate=0.5):
+    go_data = go_parser.parse_games(num_games=num_games, onehot=True)
     x = tf.placeholder(tf.float32, [None, 361])
-    W = tf.Variable(tf.zeros([361, 361]))
-    b = tf.Variable(tf.zeros([361]))
-    h = tf.nn.relu(tf.matmul(x, W) + b)
+    W1 = weight_variable([361, hidden_layer_num])
+    b1 = bias_variable([hidden_layer_num])
+    y1 = tf.nn.relu(tf.matmul(x, W1) + b1)
 
-    W1 = tf.Variable(tf.zeros([361, 361]))
-    b = tf.Variable(tf.zeros([361]))
+    keep_prob = tf.placeholder(tf.float32)
+    y_drop = tf.nn.dropout(y1, keep_prob)
+
+    W2 = weight_variable([hidden_layer_num, 361])
+    b2 = bias_variable([361])
+
+    y = tf.nn.softmax(tf.matmul(y_drop, W2) + b2)
 
 
-    y = tf.nn.softmax(tf.matmul(x, W) + b)
     y_ = tf.placeholder(tf.float32, [None, 361])
 
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
-    train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
     sess = tf.InteractiveSession()
     sess.run(tf.initialize_all_variables())
 
-    for i in range(10000):
-        batch = go_data.train.next_batch(50)
-        if i%100 == 0:
-            train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1]})
-            print("step %d, validation accuracy %g"%(i, train_accuracy))
-        train_step.run(feed_dict={x: batch[0], y_: batch[1]})
-        if i%100 == 0:
-            train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1]})
-            print("step %d, training accuracy %g"%(i, train_accuracy))
+    best_accuracy = 0
+    previous_epoch = 0
 
-    print("test accuracy %g"%accuracy.eval(feed_dict={
-        x: go_data.test.features, y_: go_data.test.labels}))
+    while go_data.train.epochs_completed < epoch:
+        batch = go_data.train.next_batch(batch_size)
+        if go_data.train.epochs_completed > previous_epoch:
+            previous_epoch = go_data.train.epochs_completed
+            train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1], keep_prob:1.0})
+            val_accuracy = accuracy.eval(feed_dict={
+                x: go_data.validation.features, y_: go_data.validation.labels, keep_prob:1.0})
+            print("epoch %d: training accuracy %g, validation accuracy %g" %(
+                previous_epoch, train_accuracy, val_accuracy))
+            if val_accuracy > best_accuracy:
+                print "best accuracy"
+                best_accuracy = copy.deepcopy(val_accuracy)
+
+        train_step.run(feed_dict={
+            x: batch[0], y_: batch[1], keep_prob:(1-drop_out_rate)})
+    test_accuracy = accuracy.eval(feed_dict={
+        x: go_data.test.features, y_: go_data.test.labels, keep_prob:1})
+    print "test accuracy %f" % test_accuracy
 
 
 
