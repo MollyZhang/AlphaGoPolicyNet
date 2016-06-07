@@ -4,3 +4,4 @@ Database/
 MNIST_data/
 dnn_env/
 *.tar.gz
+*.pyc
