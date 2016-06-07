@@ -18,4 +18,7 @@ My first try at the problem: with a fully connected network at 361x100x361 with 
 
 
 ####06/05/2016
-with a softmax network at 361x361 with no hidden layer, trained for 60 epoch without parameter tuning, I got a 3.5% validation accuracy. 
+with a softmax network at 361x361 with no hidden layer and 1000 games, trained for 60 epoch without parameter tuning, I got a 3.5% validation accuracy. 
+
+####06/06/2016
+with network at 361x361x361 with 3000 games, I got a higher 4.0% accuracy
