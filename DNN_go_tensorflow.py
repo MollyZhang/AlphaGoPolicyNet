@@ -7,13 +7,15 @@ import go_parser
 from datetime import datetime
 
 def main():
-    accu = []
+    accu = {"train": [], "test": []}
     go_data = go_parser.parse_games(num_games=1000, first_n_moves=10, onehot=True)
-    for hidden_nodes in range(500, 10500, 500):
-        accuracy = basic_3layer_NN(go_data, hidden_layer_num=hidden_nodes)
-        accu.append(accuracy)
+    for hidden_nodes in range(100, 1100, 100) + range(1500, 6500, 500):
+        train_accuracy, test_accuracy = basic_3layer_NN(go_data, hidden_layer_num=hidden_nodes)
+        accu["train"].append(train_accuracy)
+        accu["test"].append(test_accuracy)
         print hidden_nodes
-	print accuracy
+        print train_accuracy
+        print test_accuracy
     print accu
     with open("generated_data/first_10/hidden_nodes_accuracy.pkl", "w") as f:
         f.write(pickle.dumps(accu))
@@ -133,7 +135,8 @@ def basic_3layer_NN(go_data, modelfile=False, num_games='All',
             x: batch[0], y_: batch[1], keep_prob:(1-drop_out_rate)})
     test_accuracy = accuracy.eval(feed_dict={
         x: go_data.test.features, y_: go_data.test.labels, keep_prob:1})
-    print "test accuracy %f" % test_accuracy
+    train_accuracy = accuracy.eval(feed_dict={
+        x: batch[0], y_: batch[1], keep_prob: 1.0})
 
     if modelfile:
         saver.save(sess, modelfile)
@@ -155,7 +158,7 @@ def basic_3layer_NN(go_data, modelfile=False, num_games='All',
     #        np.array(board).reshape((19, 19)), \
     #        np.array(move).reshape((19, 19))
 
-    return test_accuracy
+    return train_accuracy, (test_accuracy + val_accuracy)/2
 
 
 def basic_softmax_NN():

@@ -23,6 +23,7 @@ def plot_hidden_node_and_accuracy():
         accuracies = pickle.loads(f.read())
         f.close()
 
+
     plt.plot(range(100, 2100, 100), accuracies)
     plt.xlabel("number hidden nodes")
     plt.ylabel("accuracy")
