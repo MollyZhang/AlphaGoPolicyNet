@@ -7,15 +7,16 @@ import go_parser
 from datetime import datetime
 
 def main():
-    prob, board, move = basic_3layer_NN(
-        num_games=1000, first_n=10, epoch=20, move_only=True)
-    print board
-    print move
-    print prob
+    accu = []
+    for hidden_nodes in range(100, 1100, 100):
+        print hidden_nodes
+        accuracy = basic_3layer_NN(
+            num_games=3000, first_n=10, hidden_layer_num=hidden_nodes)
+        accu.append(accuracy)
+        print accuracy
 
-    with open("probability_10_step", "w") as f:
-        f.write(pickle.dumps([prob, board, move]))
-        f.close()
+    with open("generated_data/first_10/hidden_nodes_accuracy.pkl", "w") as f:
+        f.write(pickle.dumps(accu))
 
 
 def conv(num_games='All', epoch=50, batch_size=500,
@@ -74,10 +75,10 @@ def conv(num_games='All', epoch=50, batch_size=500,
     test_accuracy = accuracy.eval(feed_dict={
         x: go_data.test.features, y_: go_data.test.labels, keep_prob:1})
     print "test accuracy %f" % test_accuracy
-
+    pass
 
 def basic_3layer_NN(modelfile=False, num_games='All',
-                    first_n = 10,
+                    first_n = 1000,
                     epoch=50, batch_size=500,
                     learning_rate=1.0,
                     hidden_layer_num=361,
@@ -147,11 +148,11 @@ def basic_3layer_NN(modelfile=False, num_games='All',
     # print "probabilities"
     # print pd.DataFrame(np.array(prob).reshape((19, 19)))
 
-    return np.array(prob).reshape((19, 19)), \
-           np.array(board).reshape((19, 19)), \
-           np.array(move).reshape((19, 19))
+    # return np.array(prob).reshape((19, 19)), \
+    #        np.array(board).reshape((19, 19)), \
+    #        np.array(move).reshape((19, 19))
 
-
+    return test_accuracy
 
 
 def basic_softmax_NN():

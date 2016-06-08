@@ -15,7 +15,21 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    draw_board_probabilities_10_step()
+    vz.draw_neural_net([10, 15, 10])
+
+
+def get_prediction_example():
+    prob, board, move = gp.basic_3layer_NN(
+        num_games=1000, first_n=10, epoch=20, move_only=True)
+    print board
+    print move
+    print prob
+
+    with open("probability_10_step", "w") as f:
+        f.write(pickle.dumps([prob, board, move]))
+        f.close()
+
+
 
 
 def draw_board_probabilities_10_step():
