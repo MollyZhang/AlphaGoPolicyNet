@@ -15,7 +15,20 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    vz.draw_neural_net([10, 15, 10])
+    plot_hidden_node_and_accuracy()
+
+
+def plot_hidden_node_and_accuracy():
+    with open("generated_data/first_10/hidden_nodes_accuracy.pkl", "r") as f:
+        accuracies = pickle.loads(f.read())
+        f.close()
+
+    plt.plot(range(100, 2100, 100), accuracies)
+    plt.xlabel("number hidden nodes")
+    plt.ylabel("accuracy")
+    plt.title("prediction accuracy with different number of hidden nodes")
+    plt.show()
+
 
 
 def get_prediction_example():
