@@ -8,13 +8,13 @@ from datetime import datetime
 
 def main():
     accu = []
+    go_data = go_parser.parse_games(num_games=1000, first_n_moves=10, onehot=True)
     for hidden_nodes in range(100, 2100, 100):
-        print hidden_nodes
-        accuracy = basic_3layer_NN(
-            num_games=1000, first_n=10, hidden_layer_num=hidden_nodes)
+        accuracy = basic_3layer_NN(go_data, hidden_layer_num=hidden_nodes)
         accu.append(accuracy)
-        print accuracy
-
+        print hidden_nodes
+	print accuracy
+    print accu
     with open("generated_data/first_10/hidden_nodes_accuracy.pkl", "w") as f:
         f.write(pickle.dumps(accu))
 
@@ -77,15 +77,15 @@ def conv(num_games='All', epoch=50, batch_size=500,
     print "test accuracy %f" % test_accuracy
     pass
 
-def basic_3layer_NN(modelfile=False, num_games='All',
+def basic_3layer_NN(go_data, modelfile=False, num_games='All',
                     first_n = 1000,
                     epoch=50, batch_size=500,
                     learning_rate=1.0,
                     hidden_layer_num=361,
                     drop_out_rate=0.2,
                     move_only=False):
-    go_data = go_parser.parse_games(num_games=num_games, first_n_moves=first_n,
-                                    move_only=move_only, onehot=True)
+    
+    go_data.epochs_completed = 0
 
     x = tf.placeholder(tf.float32, [None, 361])
     W1 = weight_variable([361, hidden_layer_num])
