@@ -9,7 +9,7 @@ from datetime import datetime
 def main():
     accu = []
     go_data = go_parser.parse_games(num_games=1000, first_n_moves=10, onehot=True)
-    for hidden_nodes in range(100, 2100, 100):
+    for hidden_nodes in range(500, 10500, 500):
         accuracy = basic_3layer_NN(go_data, hidden_layer_num=hidden_nodes)
         accu.append(accuracy)
         print hidden_nodes
@@ -85,7 +85,7 @@ def basic_3layer_NN(go_data, modelfile=False, num_games='All',
                     drop_out_rate=0.2,
                     move_only=False):
     
-    go_data.epochs_completed = 0
+    go_data.train._epochs_completed = 0
 
     x = tf.placeholder(tf.float32, [None, 361])
     W1 = weight_variable([361, hidden_layer_num])
