@@ -23,13 +23,16 @@ def plot_hidden_node_and_accuracy():
         accuracies = pickle.loads(f.read())
         f.close()
 
+    x = range(100, 1100, 100) + range(1500, 6500, 500)
 
-    plt.plot(range(100, 2100, 100), accuracies)
+    plt.plot(x, accuracies["train"], "r")
+    plt.plot(x, accuracies["test"], "g")
+    legend=["train accuracy", "test accuracy"]
     plt.xlabel("number hidden nodes")
     plt.ylabel("accuracy")
     plt.title("prediction accuracy with different number of hidden nodes")
+    plt.legend(legend, loc="best")
     plt.show()
-
 
 
 def get_prediction_example():
