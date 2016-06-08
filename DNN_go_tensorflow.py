@@ -8,10 +8,10 @@ from datetime import datetime
 
 def main():
     accu = []
-    for hidden_nodes in range(100, 1100, 100):
+    for hidden_nodes in range(100, 2100, 100):
         print hidden_nodes
         accuracy = basic_3layer_NN(
-            num_games=3000, first_n=10, hidden_layer_num=hidden_nodes)
+            num_games=1000, first_n=10, hidden_layer_num=hidden_nodes)
         accu.append(accuracy)
         print accuracy
 
@@ -113,7 +113,8 @@ def basic_3layer_NN(modelfile=False, num_games='All',
 
     best_accuracy = 0
     previous_epoch = 0
-    while go_data.train.epochs_completed < epoch:
+    best_accu_updated = 0 # how many epochs ago is the best accuracy updated
+    while best_accu_updated < 10:
         batch = go_data.train.next_batch(batch_size)
         if go_data.train.epochs_completed > previous_epoch:
             previous_epoch = go_data.train.epochs_completed
@@ -124,7 +125,9 @@ def basic_3layer_NN(modelfile=False, num_games='All',
                 previous_epoch, train_accuracy, val_accuracy))
             if val_accuracy > best_accuracy:
                 print "best accuracy"
+                best_accu_updated = 0
                 best_accuracy = copy.deepcopy(val_accuracy)
+            best_accu_updated += 1
 
         train_step.run(feed_dict={
             x: batch[0], y_: batch[1], keep_prob:(1-drop_out_rate)})
