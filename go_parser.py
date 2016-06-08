@@ -171,8 +171,12 @@ def Game_Parser(gamefile,first_n_moves, move_only=False):
         steps_taken = count_steps_taken(board_positions[-1])
         if steps_taken >= first_n_moves:
             if move_only:
-                board_positions = [board_positions[-1]]
-                next_moves = [next_moves[-1]]
+                if len(board_positions) >= 2:
+                    board_positions = [board_positions[-2]]
+                    next_moves = [next_moves[-1]]
+                else:
+                    board_positions = []
+                    next_moves = []
             break
         if "[tt]" in move:
             continue
@@ -191,8 +195,6 @@ def Game_Parser(gamefile,first_n_moves, move_only=False):
 
     oneD_features = map_2d_to_1d(features, "x")
     oneD_labels = map_2d_to_1d(labels, "y")
-
-
 
     assert(len(features) == len(oneD_labels))
     return oneD_features, oneD_labels, features, labels

@@ -15,7 +15,18 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    pass
+    draw_board_probabilities_10_step()
+
+
+def draw_board_probabilities_10_step():
+    with open("probability_10_step", "r") as f:
+        prob, board, move = pickle.loads(f.read())
+        f.close()
+    board = (board * 2).astype(int)
+
+    vz.draw_board(board, move, prob)
+
+
 
 def plot_accuracy_over_moves():
     with open("first_10_accuracies", "r") as f:
@@ -27,14 +38,13 @@ def plot_accuracy_over_moves():
     plt.show()
 
 
-
 def draw_board_probabilities():
     with open("probabilitiy_of_open_game", "r") as f:
         probs = pickle.loads(f.read())
         f.close()
 
     open_moves =gp.map_1d_to_2d(get_open_move())
-    vz.draw_board([], probs['All'])
+    vz.draw_openning_board([], probs['All'])
 
 def get_open_move():
     go_data = gp.parse_games(num_games=100, first_n_moves=1)

@@ -9,9 +9,9 @@ from datetime import datetime
 def main():
     prob, board, move = basic_3layer_NN(
         num_games=1000, first_n=10, epoch=20, move_only=True)
-    print board.reshape((19, 19))
-    print move.reshape((19, 19))
-    print prob.reshape((19, 19))
+    print board
+    print move
+    print prob
 
     with open("probability_10_step", "w") as f:
         f.write(pickle.dumps([prob, board, move]))
@@ -99,7 +99,6 @@ def basic_3layer_NN(modelfile=False, num_games='All',
 
     y = tf.nn.softmax(tf.matmul(y_drop, W2) + b2)
 
-
     y_ = tf.placeholder(tf.float32, [None, 361])
 
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
@@ -110,7 +109,6 @@ def basic_3layer_NN(modelfile=False, num_games='All',
     sess = tf.InteractiveSession()
     sess.run(tf.initialize_all_variables())
     saver = tf.train.Saver()
-
 
     best_accuracy = 0
     previous_epoch = 0
@@ -149,7 +147,12 @@ def basic_3layer_NN(modelfile=False, num_games='All',
     # print "probabilities"
     # print pd.DataFrame(np.array(prob).reshape((19, 19)))
 
-    return prob, board, move
+    return np.array(prob).reshape((19, 19)), \
+           np.array(board).reshape((19, 19)), \
+           np.array(move).reshape((19, 19))
+
+
+
 
 def basic_softmax_NN():
     go_data = go_parser.parse_games(num_games=100, onehot=True)
