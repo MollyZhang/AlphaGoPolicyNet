@@ -16,7 +16,22 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    dropout_or_not()
+    pooling_or_not()
+
+
+def pooling_or_not():
+    results = {"pooling": {"train": 0, "test": 0, "time": 0},
+               "not pooling": {"train": 0, "test": 0, "time": 0}}
+    go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
+    for pool in ["pooling", "not pooling"]:
+        (results[pool]["train"], results[pool]["test"],
+         results[pool]["time"], dummy) = dnn_go.conv(go_data, pooling=pool)
+    print results
+    with open("generated_data/pooling.pkl", "w") as f:
+        f.write(pickle.dumps(results))
+        f.close()
+
+
 
 def dropout_or_not():
     go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)

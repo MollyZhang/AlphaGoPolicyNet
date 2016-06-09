@@ -8,11 +8,11 @@ from datetime import datetime
 
 def main():
     go_data = gp.parse_games(num_games=100, first_n_moves=10, onehot=True)
-    conv(go_data)
+    print conv(go_data, pooling=False)
 
 def conv(go_data, learning_rate=1e-4, drop_out_rate=0.5,
          conv_patch_size=6, conv_features=20, hidden_nodes=2000,
-         dropout_rate=0.5, verbose=True):
+         dropout_rate=0.5, verbose=True, pooling=True):
 
     go_data.train._epochs_completed = 0
     sess = tf.InteractiveSession()
@@ -26,10 +26,15 @@ def conv(go_data, learning_rate=1e-4, drop_out_rate=0.5,
 
     h_conv1 = tf.nn.relu(conv2d(x_board, W_conv1) + b_conv1)
 
-    W_fc1 = weight_variable([19 * 19 * conv_features, hidden_nodes])
     b_fc1 = bias_variable([hidden_nodes])
 
-    h_pool2_flat = tf.reshape(h_conv1, [-1, 19*19*conv_features])
+    if pooling:
+        h_pool1 = max_pool_2x2(h_conv1)
+        W_fc1 = weight_variable([10 * 10 * conv_features, hidden_nodes])
+        h_pool2_flat = tf.reshape(h_pool1, [-1, 10*10*conv_features])
+    else:
+        W_fc1 = weight_variable([19 * 19 * conv_features, hidden_nodes])
+        h_pool2_flat = tf.reshape(h_conv1, [-1, 19*19*conv_features])
     h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
     keep_prob = tf.placeholder(tf.float32)
@@ -40,19 +45,21 @@ def conv(go_data, learning_rate=1e-4, drop_out_rate=0.5,
 
     y = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
-    train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+    train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
     sess.run(tf.initialize_all_variables())
-    return train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob, dropout_rate, verbose)
+
+    return train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob,
+                 dropout_rate, verbose)
 
 
 def basic_3layer_NN(go_data, verbose=True,
                     learning_rate=1.0,
                     hidden_layer_num=2000,
                     dropout_rate=0.5):
-    
 
     x = tf.placeholder(tf.float32, [None, 361])
     W1 = weight_variable([361, hidden_layer_num])
@@ -69,26 +76,28 @@ def basic_3layer_NN(go_data, verbose=True,
 
     y_ = tf.placeholder(tf.float32, [None, 361])
 
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
-    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
     correct_prediction = tf.equal(tf.argmax(y, 1), tf.argmax(y_, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-
     sess = tf.InteractiveSession()
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+    train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
+
     sess.run(tf.initialize_all_variables())
     # saver = tf.train.Saver()
-    return train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob, dropout_rate, verbose)
+    return train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob,
+                 dropout_rate, verbose)
 
 
 
-def train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob, dropout_rate, verbose):
+def train(go_data, sess, train_step, accuracy, x, y, y_,
+          keep_prob, dropout_rate, verbose):
     go_data.train._epochs_completed = 0
     best_accuracy = 0
     previous_epoch = 0
-    best_accu_updated = 0 # how many epochs ago is the best accuracy updated
     epoch_times = []
     t1 = datetime.now()
-    while best_accu_updated < 10:
+    best_accu_updated = 0   # how many epochs ago is the best accuracy updated# h
+    while best_accu_updated < 15:
         batch = go_data.train.next_batch(128)
         if go_data.train.epochs_completed > previous_epoch:
             previous_epoch = go_data.train.epochs_completed
@@ -106,7 +115,7 @@ def train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob, dropout_rate
 
         t3 = datetime.now()
         train_step.run(feed_dict={
-            x: batch[0], y_: batch[1], keep_prob:(1-dropout_rate)})
+            x: batch[0], y_: batch[1], keep_prob: (1-dropout_rate)})
         t4 = datetime.now()
         epoch_times.append((t4-t3).total_seconds())
     epoch_time = sum(epoch_times)/go_data.train.epochs_completed
@@ -140,7 +149,7 @@ def train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob, dropout_rate
     #        np.array(board).reshape((19, 19)), \
     #        np.array(move).reshape((19, 19))
 
-    return train_accuracy, (test_accuracy + val_accuracy)/2, training_time, epoch_time
+    return train_accuracy, val_accuracy, training_time, epoch_time
 
 
 def basic_softmax_NN():
