@@ -93,7 +93,7 @@ def parse_games(num_games=1000, first_n_moves=10,
     all_labels = []
     for i in range(len(files)):
         if i % 1000 == 0:
-            print "parsing game %d to %d" %(i+1, i+999)
+            print "parsing game %d to %d" %(i, i+999)
         features, labels, dummy1, dummy2 = Game_Parser(files[i],
                                                        first_n_moves,
                                                        move_only)

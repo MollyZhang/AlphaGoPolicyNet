@@ -57,7 +57,6 @@ def draw_board(board, move, prob):
 
     color_dict = {1: "w", 2: "k"}
 
-
     # #scale probabilities so that they look good of each stone
     Scaler = MinMaxScaler()
     new_probs = Scaler.fit_transform(np.log(prob))

@@ -15,12 +15,12 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    plot_accuracy_scaling_with_training_example()
+    plot_accuracy_over_moves()
 
 
 def plot_accuracy_scaling_with_training_example():
     accu = {"train": [], "test": [], "epoch_time": []}
-    for n in range(1000, 9000, 1000) + ['All']:
+    for n in [1000, 3000, 5000, 10000, 30000, 50000, 'All']:
         go_data = gp.parse_games(num_games=n, first_n_moves=10, onehot=True)
         train_accuracy, test_accuracy, epoch_time = dnn_go.basic_3layer_NN(go_data, hidden_layer_num=2000)
         accu["train"].append(train_accuracy)
@@ -31,7 +31,7 @@ def plot_accuracy_scaling_with_training_example():
         print test_accuracy
         print epoch_time, "seconds"
     print accu
-    with open("generated_data/first_10/sample_size_accuracy.pkl", "w") as f:
+    with open("generated_data/first_10/sample_size_accuracy_2.pkl", "w") as f:
         f.write(pickle.dumps(accu))
 
 def plot_hidden_node_and_accuracy():
@@ -71,7 +71,7 @@ def get_prediction_example():
     print move
     print prob
 
-    with open("probability_10_step", "w") as f:
+    with open("generated_data/first_10/probability_10_step", "w") as f:
         f.write(pickle.dumps([prob, board, move]))
         f.close()
 
@@ -79,7 +79,7 @@ def get_prediction_example():
 
 
 def draw_board_probabilities_10_step():
-    with open("probability_10_step", "r") as f:
+    with open("/Users/Molly/Desktop/CMPS218 Deep Learning/AlphaGoPolicyNet/generated_data/probability_10_step", "r") as f:
         prob, board, move = pickle.loads(f.read())
         f.close()
     board = (board * 2).astype(int)
@@ -89,13 +89,22 @@ def draw_board_probabilities_10_step():
 
 
 def plot_accuracy_over_moves():
-    with open("first_10_accuracies", "r") as f:
-        accu = pickle.loads(f.read())
+    test_accu = {1000: [], 5000: [], 20000: []}
+    for n in [1000, 5000, 20000]:
+        for move in range(1, 21):
+            go_data = gp.parse_games(num_games=n, first_n_moves=move, onehot=True)
+            dummy1, test_accuracy, dummy2 = dnn_go.basic_3layer_NN(
+                go_data, verbose=False, hidden_layer_num=2000)
+            test_accu[n].append(test_accuracy)
+            print "num games = %d, moves = %d, accuracy=%f" %(n, move, test_accuracy)
+    with open("generated_data/accuracy_decay", "w") as f:
+        f.write(pickle.dumps(test_accu))
 
-    plt.plot(accu)
-    plt.xlabel("number of moves")
-    plt.ylabel("prediction accuracy")
-    plt.show()
+
+    # plt.plot(test_accuracy)
+    # plt.xlabel("number of moves")
+    # plt.ylabel("prediction accuracy")
+    # plt.show()
 
 
 def draw_board_probabilities():

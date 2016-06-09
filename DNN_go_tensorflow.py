@@ -68,7 +68,8 @@ def conv(num_games='All', epoch=50, batch_size=500,
     print "test accuracy %f" % test_accuracy
     pass
 
-def basic_3layer_NN(go_data, modelfile=False, num_games='All',
+def basic_3layer_NN(go_data, verbose=True,
+                    modelfile=False, num_games='All',
                     first_n = 1000,
                     epoch=50, batch_size=500,
                     learning_rate=1.0,
@@ -113,10 +114,11 @@ def basic_3layer_NN(go_data, modelfile=False, num_games='All',
             train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1], keep_prob:1.0})
             val_accuracy = accuracy.eval(feed_dict={
                 x: go_data.validation.features, y_: go_data.validation.labels, keep_prob:1.0})
-            print("epoch %d: training accuracy %g, validation accuracy %g" %(
-                previous_epoch, train_accuracy, val_accuracy))
+            if verbose:
+                print("epoch %d: training accuracy %g, validation accuracy %g" %(
+                    previous_epoch, train_accuracy, val_accuracy))
             if val_accuracy > best_accuracy:
-                print "best accuracy"
+                if verbose: print "best accuracy"
                 best_accu_updated = 0
                 best_accuracy = copy.deepcopy(val_accuracy)
             best_accu_updated += 1
