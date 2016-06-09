@@ -105,6 +105,7 @@ def basic_3layer_NN(go_data, modelfile=False, num_games='All',
     best_accuracy = 0
     previous_epoch = 0
     best_accu_updated = 0 # how many epochs ago is the best accuracy updated
+    epoch_times = []
     while best_accu_updated < 10:
         batch = go_data.train.next_batch(batch_size)
         if go_data.train.epochs_completed > previous_epoch:
@@ -120,8 +121,14 @@ def basic_3layer_NN(go_data, modelfile=False, num_games='All',
                 best_accuracy = copy.deepcopy(val_accuracy)
             best_accu_updated += 1
 
+        t1 = datetime.now()
         train_step.run(feed_dict={
             x: batch[0], y_: batch[1], keep_prob:(1-drop_out_rate)})
+        t2 = datetime.now()
+        epoch_times.append(t2-t1)
+
+    average_epoch_time = sum(t.total_seconds() for t in epoch_times)/go_data.train.epochs_completed
+
     test_accuracy = accuracy.eval(feed_dict={
         x: go_data.test.features, y_: go_data.test.labels, keep_prob:1})
     train_accuracy = accuracy.eval(feed_dict={
@@ -147,7 +154,7 @@ def basic_3layer_NN(go_data, modelfile=False, num_games='All',
     #        np.array(board).reshape((19, 19)), \
     #        np.array(move).reshape((19, 19))
 
-    return train_accuracy, (test_accuracy + val_accuracy)/2
+    return train_accuracy, (test_accuracy + val_accuracy)/2, average_epoch_time
 
 
 def basic_softmax_NN():

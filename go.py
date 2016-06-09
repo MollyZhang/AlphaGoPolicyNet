@@ -19,15 +19,17 @@ def main():
 
 
 def plot_accuracy_scaling_with_training_example():
-    accu = {"train": [], "test": []}
+    accu = {"train": [], "test": [], "epoch_time": []}
     for n in range(1000, 9000, 1000) + ['All']:
         go_data = gp.parse_games(num_games=n, first_n_moves=10, onehot=True)
-        train_accuracy, test_accuracy = dnn_go.basic_3layer_NN(go_data, hidden_layer_num=2000)
+        train_accuracy, test_accuracy, epoch_time = dnn_go.basic_3layer_NN(go_data, hidden_layer_num=2000)
         accu["train"].append(train_accuracy)
         accu["test"].append(test_accuracy)
+        accu["epoch_time"].append(epoch_time)
         print n
         print train_accuracy
         print test_accuracy
+        print epoch_time, "seconds"
     print accu
     with open("generated_data/first_10/sample_size_accuracy.pkl", "w") as f:
         f.write(pickle.dumps(accu))
