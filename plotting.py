@@ -19,24 +19,45 @@ def main():
     dropout_or_not()
 
 def dropout_or_not():
-    go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
-    x = [0.0, .2, 0.5, 0.8]
-    train_accu = []
-    test_accu = []
-    time = []
-    for rate in [0.0, .2, 0.5, 0.8]:
-        train_accuracy, test_accuracy, training_time, epoch_time = dnn_go.basic_3layer_NN(
-            go_data, hidden_layer_num=2000, drop_out_rate=rate)
-        train_accu.append(train_accuracy)
-        test_accu.append(test_accuracy)
-        time.append(training_time)
-    with open("generated_data/dropout_or_not.pkl", "w") as f:
-        f.write(pickle.dumps({"x": x, "train accuracy": train_accu,
-                              "test accuracy": test_accu, "time": time}))
+    # go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
+    # x = [0.0, .2, 0.5, 0.8]
+    # train_accu = []
+    # test_accu = []
+    # time = []
+    # for rate in [0.0, .2, 0.5, 0.8]:
+    #     train_accuracy, test_accuracy, training_time, epoch_time = dnn_go.basic_3layer_NN(
+    #         go_data, hidden_layer_num=2000, drop_out_rate=rate)
+    #     train_accu.append(train_accuracy)
+    #     test_accu.append(test_accuracy)
+    #     time.append(training_time)
+    # with open("generated_data/dropout_or_not.pkl", "w") as f:
+    #     f.write(pickle.dumps({"x": x, "train accuracy": train_accu,
+    #                           "test accuracy": test_accu, "time": time}))
 
     with open("generated_data/dropout_or_not.pkl", "r") as f:
-        print pickle.loads(f.read())
+        accu = pickle.loads(f.read())
 
+    fig, ax1 = plt.subplots()
+    ax1.plot(accu['x'], accu['test accuracy'], 'bo-')
+    ax1.plot(accu['x'], accu['train accuracy'], 'g*-')
+    ax1.set_xlabel("dropout rate")
+    # Make the y-axis label and tick labels match the line color.
+    ax1.set_ylabel('prediction accuracy', color='b')
+    for tl in ax1.get_yticklabels():
+        tl.set_color('b')
+    ax2 = ax1.twinx()
+    ax2.plot(accu['x'], accu['time'], 'ro-')
+    ax2.set_ylabel('training time in sceonds', color='r')
+    for tl in ax2.get_yticklabels():
+        tl.set_color('r')
+
+    plt.title("effect of droppout")
+    ax1.legend(["test accuracy", "train accuracy"], loc="center left")
+
+    axbox = ax1.get_position()
+
+    ax2.legend(["training time"], loc=(axbox.x0 - 0.1, axbox.y0 + 0.25))
+    plt.show()
 
 def plot_accuracy_scaling_with_training_example():
     # accu = {"train": [], "test": [], "epoch_time": [], "x": [50000, 30000, 10000, 5000, 3000, 1000]}

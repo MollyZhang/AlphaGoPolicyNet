@@ -7,13 +7,12 @@ import go_parser
 from datetime import datetime
 
 def main():
-    pass
+
 
 
 def conv(num_games='All', epoch=50, batch_size=500,
          learning_rate=3e-4, drop_out_rate=0.2,
          conv_patch_size=6, conv_features=10):
-    go_data = go_parser.parse_games(num_games=num_games, first_n_moves=10, onehot=True)
 
     sess = tf.InteractiveSession()
 
@@ -73,7 +72,7 @@ def basic_3layer_NN(go_data, verbose=True,
                     epoch=50, batch_size=128,
                     learning_rate=1.0,
                     hidden_layer_num=2000,
-                    drop_out_rate=0.2,
+                    drop_out_rate=0.5,
                     move_only=False):
     
     go_data.train._epochs_completed = 0

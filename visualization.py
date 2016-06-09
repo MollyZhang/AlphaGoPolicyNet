@@ -120,3 +120,5 @@ def draw_neural_net(layer_sizes):
                 ax.add_artist(line)
     ax.set_axis_off()
     plt.show()
+
+
