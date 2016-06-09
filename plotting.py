@@ -4,6 +4,7 @@ import tensorflow as tf
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+import gc
 
 #my scripts
 import go_parser as gp
@@ -15,8 +16,7 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    dropout_or_not()
-
+    plot_accuracy_scaling_with_training_example()
 
 def dropout_or_not():
     go_data = gp.parse_games(num_games=30000, first_n_moves=10, onehot=True)
@@ -39,48 +39,45 @@ def dropout_or_not():
 
 
 def plot_accuracy_scaling_with_training_example():
-    # accu = {"train": [], "test": [], "epoch_time": []}
-    # for n in [1000, 3000, 5000, 10000, 30000, 50000, 'All']:
-    #     go_data = gp.parse_games(num_games=n, first_n_moves=10, onehot=True)
-    #     train_accuracy, test_accuracy, epoch_time = dnn_go.basic_3layer_NN(go_data, hidden_layer_num=2000)
-    #     accu["train"].append(train_accuracy)
-    #     accu["test"].append(test_accuracy)
-    #     accu["epoch_time"].append(epoch_time)
-    #     print n
-    #     print train_accuracy
-    #     print test_accuracy
-    #     print epoch_time, "seconds"
-    # print accu
-    with open("generated_data/first_10/sample_size_accuracy_2.pkl", "r") as f:
-        accu2 = pickle.loads(f.read())
+    accu = {"train": [], "test": [], "epoch_time": [], "x": [50000, 30000, 10000, 5000, 3000, 1000]}
+    for n in accu["x"]:
+        go_data = gp.parse_games(num_games=n, first_n_moves=10, onehot=True)
+        train_accuracy, test_accuracy, dummy, epoch_time = dnn_go.basic_3layer_NN(
+            go_data, hidden_layer_num=2000)
+        accu["train"].append(train_accuracy)
+        accu["test"].append(test_accuracy)
+        accu["epoch_time"].append(epoch_time)
+        print n
+        print train_accuracy
+        print test_accuracy
+        print epoch_time, "seconds"
+        gc.collect()
+    print accu
+    with open("generated_data/first_10/sample_size_accuracy.pkl", "w") as f:
+        f.write(pickle.dumps(accu))
         f.close()
 
-    with open("generated_data/first_10/sample_size_accuracy.pkl", "r") as f:
-        accu1 = pickle.loads(f.read())
-        f.close()
-    x = accu1['x'] + [10000, 30000, 50000]
-    test = accu1['test'] + accu2['test']
-    train = accu1['train'] + accu2['train']
-    epoch_time = accu1['epoch_time'] + accu2['epoch_time']
-
-    plt.figure(1)
-    plt.plot(x, test)
-    plt.plot(x, train, "r")
-    plt.xlabel("number of games as training data")
-    plt.ylabel("prediction accuracy")
-    plt.title("accurayc scaling with more training data")
-    plt.legend(["test accuracy", "train accuracy"], loc="best")
-    plt.figure(2)
-    plt.plot(x, epoch_time)
-    plt.xlabel("number of games as training data")
-    plt.ylabel("epoch time in seconds")
-    plt.title("epoch time increasing with more training data")
-    plt.show()
-
-
-
-
-    plt.show()
+    # with open("generated_data/first_10/sample_size_accuracy.pkl", "r") as f:
+    #     accu = pickle.loads(f.read())
+    #     f.close()
+    # x = accu1['x'] + [10000, 30000, 50000]
+    # test = accu1['test'] + accu2['test']
+    # train = accu1['train'] + accu2['train']
+    # epoch_time = accu1['epoch_time'] + accu2['epoch_time']
+    #
+    # plt.figure(1)
+    # plt.plot(x, test)
+    # plt.plot(x, train, "r")
+    # plt.xlabel("number of games as training data")
+    # plt.ylabel("prediction accuracy")
+    # plt.title("accurayc scaling with more training data")
+    # plt.legend(["test accuracy", "train accuracy"], loc="best")
+    # plt.figure(2)
+    # plt.plot(x, epoch_time)
+    # plt.xlabel("number of games as training data")
+    # plt.ylabel("epoch time in seconds")
+    # plt.title("epoch time increasing with more training data")
+    # plt.show()
 
 
 def plot_hidden_node_and_accuracy():

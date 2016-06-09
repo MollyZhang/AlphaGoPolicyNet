@@ -69,11 +69,10 @@ def conv(num_games='All', epoch=50, batch_size=500,
     pass
 
 def basic_3layer_NN(go_data, verbose=True,
-                    modelfile=False, num_games='All',
-                    first_n = 1000,
-                    epoch=50, batch_size=500,
+                    modelfile=False,
+                    epoch=50, batch_size=128,
                     learning_rate=1.0,
-                    hidden_layer_num=361,
+                    hidden_layer_num=2000,
                     drop_out_rate=0.2,
                     move_only=False):
     
@@ -125,8 +124,13 @@ def basic_3layer_NN(go_data, verbose=True,
                 best_accuracy = copy.deepcopy(val_accuracy)
             best_accu_updated += 1
 
+        t3 = datetime.now()
         train_step.run(feed_dict={
             x: batch[0], y_: batch[1], keep_prob:(1-drop_out_rate)})
+        t4 = datetime.now()
+        epoch_times.append((t4-t3).total_seconds())
+    epoch_time = sum(epoch_times)/go_data.train.epochs_completed
+
     t2 = datetime.now()
     training_time = (t2-t1).total_seconds()
 
@@ -156,7 +160,7 @@ def basic_3layer_NN(go_data, verbose=True,
     #        np.array(board).reshape((19, 19)), \
     #        np.array(move).reshape((19, 19))
 
-    return train_accuracy, (test_accuracy + val_accuracy)/2, training_time
+    return train_accuracy, (test_accuracy + val_accuracy)/2, training_time, epoch_time
 
 
 def basic_softmax_NN():
