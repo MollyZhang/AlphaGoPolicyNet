@@ -5,3 +5,4 @@ MNIST_data/
 dnn_env/
 *.tar.gz
 *.pyc
+scratch_pad.py
