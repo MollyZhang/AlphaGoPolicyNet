@@ -17,39 +17,98 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    pooling_or_not()
+    patch_size()
 
 
 def patch_size():
-    result = {"x": [], "train": [], "test": [], "time": []}
-    go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
-    for size in range(3, 12):
-        train_accu, test_accu, time, dummy = dnn_go.conv(
-            go_data, conv_patch_size=size, pooling=True)
-        result["x"].append(size)
-        result["train"].append(train_accu[-1])
-        result["test"].append(test_accu[-1])
-        result["time"].append(time)
-    pprint.pprint(result)
-    with open("generated_result/patch_size", "w") as f:
-        f.write(pickle.dumps(result))
-        f.close()
+    # result = {"x": [], "train": [], "test": [], "time": []}
+    # go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
+    # for size in range(3, 12):
+    #     train_accu, test_accu, time, dummy = dnn_go.conv(
+    #         go_data, conv_patch_size=size, pooling=True)
+    #     result["x"].append(size)
+    #     result["train"].append(train_accu[-1])
+    #     result["test"].append(test_accu[-1])
+    #     result["time"].append(time)
+    # pprint.pprint(result)
+    # with open("generated_result/patch_size", "w") as f:
+    #     f.write(pickle.dumps(result))
+    #     f.close()
+    accu = {'test': [0.42558536,
+                       0.42783415,
+                       0.42655641,
+                      0.42819193,
+                      0.43125847,
+                      0.43110517,
+                      0.42829415,
+                      0.43008298,
+                      0.43003187],
+             'time': [425.863521,
+                      429.166862,
+                      460.774318,
+                      461.709615,
+                      437.670243,
+                      440.934634,
+                      446.709425,
+                      449.771147,
+                      445.710461],
+             'train': [0.4609375,
+                       0.5546875,
+                       0.5078125,
+                       0.4765625,
+                       0.53125,
+                       0.59375,
+                       0.46875,
+                       0.546875,
+                       0.53125],
+             'x': [3, 4, 5, 6, 7, 8, 9, 10, 11]}
 
 
+    fig, ax1 = plt.subplots()
+    ax1.plot(accu['x'], accu['test'], 'bo-')
+    ax1.plot(accu['x'], accu['train'], 'r*-')
+    ax1.set_xlabel("conv patch size")
+    # Make the y-axis label and tick labels match the line color.
+    ax1.set_ylabel('prediction accuracy', color='b')
+
+    plt.title("prediction accuracy influenced by patch size")
+    ax1.legend(["test accuracy", "train accuracy"], loc="best")
+
+    axbox = ax1.get_position()
+
+    plt.show()
 
 def pooling_or_not():
-    results = {"pooling": {"train": [], "test": [], "time": 0},
-               "not pooling": {"train": [], "test": [], "time": 0}}
-    go_data = gp.parse_games(num_games=1000, first_n_moves=10, onehot=True)
-    for pool in ["pooling", "not pooling"]:
-        (results[pool]["train"], results[pool]["test"],
-         results[pool]["time"], dummy) = dnn_go.conv(go_data, pooling=pool)
-    print results
-    with open("generated_data/pooling.pkl", "w") as f:
-        f.write(pickle.dumps(results))
+    # results = {"pooling": {"train": [], "test": [], "time": 0},
+    #            "not pooling": {"train": [], "test": [], "time": 0}}
+    # go_data = gp.parse_games(num_games=1000, first_n_moves=10, onehot=True)
+    # for pool in ["pooling", "not pooling"]:
+    #     (results[pool]["train"], results[pool]["test"],
+    #      results[pool]["time"], dummy) = dnn_go.conv(go_data, pooling=pool)
+    # print results
+    # with open("generated_data/pooling.pkl", "w") as f:
+    #     f.write(pickle.dumps(results))
+    #     f.close()
+
+    with open("generated_data/pooling.pkl", "r") as f:
+        accu = pickle.loads(f.read())
         f.close()
 
+    colors = ["g", "r", "b", "m"]
+    i = 0
+    for p in ["pooling", "not pooling"]:
+        epochs= range(len(accu[p]['test']))
 
+        plt.plot(epochs, accu[p]['test'], colors[i] + 'o-')
+        i += 1
+        plt.plot(epochs, accu[p]['train'], colors[i] + '*-')
+        i += 1
+    plt.xlabel("number of epochs")
+    plt.title("Pooling or Not Pooling after convolutional layer")
+    plt.legend(["test accuracy with pooling", "train accuracy with pooling",
+                "test accuracy without pooling", "train accuracy without pooling"], loc='best')
+
+    plt.show()
 
 def dropout_or_not():
     go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
