@@ -7,18 +7,7 @@ import go_parser
 from datetime import datetime
 
 def main():
-    accu = {"train": [], "test": []}
-    go_data = go_parser.parse_games(num_games=1000, first_n_moves=10, onehot=True)
-    for hidden_nodes in range(100, 1100, 100) + range(1500, 6500, 500):
-        train_accuracy, test_accuracy = basic_3layer_NN(go_data, hidden_layer_num=hidden_nodes)
-        accu["train"].append(train_accuracy)
-        accu["test"].append(test_accuracy)
-        print hidden_nodes
-        print train_accuracy
-        print test_accuracy
-    print accu
-    with open("generated_data/first_10/hidden_nodes_accuracy.pkl", "w") as f:
-        f.write(pickle.dumps(accu))
+    pass
 
 
 def conv(num_games='All', epoch=50, batch_size=500,
