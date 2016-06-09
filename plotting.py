@@ -15,7 +15,27 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    plot_accuracy_scaling_with_training_example()
+    dropout_or_not()
+
+
+def dropout_or_not():
+    go_data = gp.parse_games(num_games=300, first_n_moves=10, onehot=True)
+    x = [0.0, .2, 0.5, 0.8]
+    train_accu = []
+    test_accu = []
+    time = []
+    for rate in [0.0, .2, 0.5, 0.8]:
+        train_accuracy, test_accuracy, training_time = dnn_go.basic_3layer_NN(
+            go_data, hidden_layer_num=2000, drop_out_rate=rate)
+        train_accu.append(train_accuracy)
+        test_accu.append(test_accuracy)
+        time.append(training_time)
+    with open("generated_data/dropout_or_not.pkl", "w") as f:
+        f.write(pickle.dumps([x, train_accu, test_accu, time]))
+
+    with open("generated_data/dropout_or_not.pkl", "r") as f:
+        print pickle.loads(f.read())
+
 
 def plot_accuracy_scaling_with_training_example():
     # accu = {"train": [], "test": [], "epoch_time": []}
@@ -30,15 +50,36 @@ def plot_accuracy_scaling_with_training_example():
     #     print test_accuracy
     #     print epoch_time, "seconds"
     # print accu
-    with open("generated_data/first_10/sample_size_accuracy_2.pkl", "w") as f:
+    with open("generated_data/first_10/sample_size_accuracy_2.pkl", "r") as f:
         accu2 = pickle.loads(f.read())
         f.close()
 
-    with open("generated_data/first_10/sample_size_accuracy_1.pkl", "w") as f:
+    with open("generated_data/first_10/sample_size_accuracy.pkl", "r") as f:
         accu1 = pickle.loads(f.read())
         f.close()
-    print accu1
-    print accu2
+    x = accu1['x'] + [10000, 30000, 50000]
+    test = accu1['test'] + accu2['test']
+    train = accu1['train'] + accu2['train']
+    epoch_time = accu1['epoch_time'] + accu2['epoch_time']
+
+    plt.figure(1)
+    plt.plot(x, test)
+    plt.plot(x, train, "r")
+    plt.xlabel("number of games as training data")
+    plt.ylabel("prediction accuracy")
+    plt.title("accurayc scaling with more training data")
+    plt.legend(["test accuracy", "train accuracy"], loc="best")
+    plt.figure(2)
+    plt.plot(x, epoch_time)
+    plt.xlabel("number of games as training data")
+    plt.ylabel("epoch time in seconds")
+    plt.title("epoch time increasing with more training data")
+    plt.show()
+
+
+
+
+    plt.show()
 
 
 def plot_hidden_node_and_accuracy():
