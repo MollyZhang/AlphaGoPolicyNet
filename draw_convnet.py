@@ -173,7 +173,7 @@ if __name__ == '__main__':
     collection.set_array(np.array(colors))
     ax.add_collection(collection)
     plt.tight_layout()
-    plt.axis('equal')con
+    plt.axis('equal')
     plt.axis('off')
     plt.show()
     fig.set_size_inches(8, 2.5)

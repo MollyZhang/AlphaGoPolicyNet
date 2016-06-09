@@ -7,34 +7,34 @@ import go_parser
 from datetime import datetime
 
 def main():
+    go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
 
 
+def conv(go_data, learning_rate=3e-4, drop_out_rate=0.5,
+         conv_patch_size=6, conv_features=20, hidden_nodes=2000):
 
-def conv(num_games='All', epoch=50, batch_size=500,
-         learning_rate=3e-4, drop_out_rate=0.2,
-         conv_patch_size=6, conv_features=10):
-
+    go_data.train._epochs_completed = 0
     sess = tf.InteractiveSession()
 
     x = tf.placeholder(tf.float32, shape=[None, 361])
     y_ = tf.placeholder(tf.float32, shape=[None, 361])
 
     W_conv1 = weight_variable([conv_patch_size, conv_patch_size, 1, conv_features])
-    b_conv1 = bias_variable([10])
+    b_conv1 = bias_variable([conv_features])
     x_board = tf.reshape(x, [-1, 19, 19, 1])
 
     h_conv1 = tf.nn.relu(conv2d(x_board, W_conv1) + b_conv1)
 
-    W_fc1 = weight_variable([19 * 19 * 10, 361])
-    b_fc1 = bias_variable([361])
+    W_fc1 = weight_variable([19 * 19 * conv_features, hidden_nodes])
+    b_fc1 = bias_variable([hidden_nodes])
 
-    h_pool2_flat = tf.reshape(h_conv1, [-1, 19*19*10])
+    h_pool2_flat = tf.reshape(h_conv1, [-1, 19*19*conv_features])
     h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
     keep_prob = tf.placeholder(tf.float32)
     h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-    W_fc2 = weight_variable([361, 361])
+    W_fc2 = weight_variable([hidden_nodes, 361])
     b_fc2 = bias_variable([361])
 
     y_conv=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
@@ -65,17 +65,12 @@ def conv(num_games='All', epoch=50, batch_size=500,
     test_accuracy = accuracy.eval(feed_dict={
         x: go_data.test.features, y_: go_data.test.labels, keep_prob:1})
     print "test accuracy %f" % test_accuracy
-    pass
 
 def basic_3layer_NN(go_data, verbose=True,
-                    modelfile=False,
-                    epoch=50, batch_size=128,
                     learning_rate=1.0,
                     hidden_layer_num=2000,
-                    drop_out_rate=0.5,
-                    move_only=False):
+                    dropout_rate=0.5):
     
-    go_data.train._epochs_completed = 0
 
     x = tf.placeholder(tf.float32, [None, 361])
     W1 = weight_variable([361, hidden_layer_num])
@@ -99,16 +94,20 @@ def basic_3layer_NN(go_data, verbose=True,
 
     sess = tf.InteractiveSession()
     sess.run(tf.initialize_all_variables())
-    saver = tf.train.Saver()
+    # saver = tf.train.Saver()
+    return train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob, dropout_rate, verbose)
 
+
+
+def train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob, dropout_rate, verbose):
+    go_data.train._epochs_completed = 0
     best_accuracy = 0
     previous_epoch = 0
     best_accu_updated = 0 # how many epochs ago is the best accuracy updated
     epoch_times = []
-
     t1 = datetime.now()
     while best_accu_updated < 10:
-        batch = go_data.train.next_batch(batch_size)
+        batch = go_data.train.next_batch(128)
         if go_data.train.epochs_completed > previous_epoch:
             previous_epoch = go_data.train.epochs_completed
             train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1], keep_prob:1.0})
@@ -125,7 +124,7 @@ def basic_3layer_NN(go_data, verbose=True,
 
         t3 = datetime.now()
         train_step.run(feed_dict={
-            x: batch[0], y_: batch[1], keep_prob:(1-drop_out_rate)})
+            x: batch[0], y_: batch[1], keep_prob:(1-dropout_rate)})
         t4 = datetime.now()
         epoch_times.append((t4-t3).total_seconds())
     epoch_time = sum(epoch_times)/go_data.train.epochs_completed
@@ -139,8 +138,8 @@ def basic_3layer_NN(go_data, verbose=True,
     train_accuracy = accuracy.eval(feed_dict={
         x: batch[0], y_: batch[1], keep_prob: 1.0})
 
-    if modelfile:
-        saver.save(sess, modelfile)
+    # if modelfile:
+    #     saver.save(sess, modelfile)
 
     probabilities = y
     board = [go_data.test.features[0]]
