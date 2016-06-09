@@ -96,8 +96,8 @@ def train(go_data, sess, train_step, accuracy, x, y, y_,
     previous_epoch = 0
     epoch_times = []
     t1 = datetime.now()
-    best_accu_updated = 0   # how many epochs ago is the best accuracy updated# h
-    while best_accu_updated < 15:
+    best_accu_updated = 0   # how many epochs ago is the best accuracy updated#
+    while best_accu_updated < 10 and previous_epoch <= 50:
         batch = go_data.train.next_batch(128)
         if go_data.train.epochs_completed > previous_epoch:
             previous_epoch = go_data.train.epochs_completed
