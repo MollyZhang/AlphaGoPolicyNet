@@ -16,7 +16,7 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    plot_accuracy_scaling_with_training_example()
+    dropout_or_not()
 
 def dropout_or_not():
     go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
@@ -25,7 +25,7 @@ def dropout_or_not():
     test_accu = []
     time = []
     for rate in [0.0, .2, 0.5, 0.8]:
-        train_accuracy, test_accuracy, training_time = dnn_go.basic_3layer_NN(
+        train_accuracy, test_accuracy, training_time, epoch_time = dnn_go.basic_3layer_NN(
             go_data, hidden_layer_num=2000, drop_out_rate=rate)
         train_accu.append(train_accuracy)
         test_accu.append(test_accuracy)
