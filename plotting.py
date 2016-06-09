@@ -5,6 +5,7 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import gc
+import pprint
 
 #my scripts
 import go_parser as gp
@@ -19,10 +20,27 @@ def main():
     pooling_or_not()
 
 
-def pooling_or_not():
-    results = {"pooling": {"train": 0, "test": 0, "time": 0},
-               "not pooling": {"train": 0, "test": 0, "time": 0}}
+def patch_size():
+    result = {"x": [], "train": [], "test": [], "time": []}
     go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
+    for size in range(3, 12):
+        train_accu, test_accu, time, dummy = dnn_go.conv(
+            go_data, conv_patch_size=size, pooling=True)
+        result["x"].append(size)
+        result["train"].append(train_accu[-1])
+        result["test"].append(test_accu[-1])
+        result["time"].append(time)
+    pprint.pprint(result)
+    with open("generated_result/patch_size", "w") as f:
+        f.write(pickle.dumps(result))
+        f.close()
+
+
+
+def pooling_or_not():
+    results = {"pooling": {"train": [], "test": [], "time": 0},
+               "not pooling": {"train": [], "test": [], "time": 0}}
+    go_data = gp.parse_games(num_games=1000, first_n_moves=10, onehot=True)
     for pool in ["pooling", "not pooling"]:
         (results[pool]["train"], results[pool]["test"],
          results[pool]["time"], dummy) = dnn_go.conv(go_data, pooling=pool)
