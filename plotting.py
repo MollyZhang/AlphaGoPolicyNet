@@ -15,7 +15,7 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    plot_hidden_node_and_accuracy()
+    plot_accuracy_over_moves()
 
 
 def plot_accuracy_scaling_with_training_example():
@@ -89,22 +89,30 @@ def draw_board_probabilities_10_step():
 
 
 def plot_accuracy_over_moves():
-    test_accu = {1000: [], 5000: [], 20000: []}
-    for n in [1000, 5000, 20000]:
-        for move in range(1, 21):
-            go_data = gp.parse_games(num_games=n, first_n_moves=move, onehot=True)
-            dummy1, test_accuracy, dummy2 = dnn_go.basic_3layer_NN(
-                go_data, verbose=False, hidden_layer_num=2000)
-            test_accu[n].append(test_accuracy)
-            print "num games = %d, moves = %d, accuracy=%f" %(n, move, test_accuracy)
-    with open("generated_data/accuracy_decay", "w") as f:
-        f.write(pickle.dumps(test_accu))
+    # test_accu = {1000: [], 5000: [], 20000: []}
+    # for n in [1000, 5000, 20000]:
+    #     for move in range(1, 21):
+    #         go_data = gp.parse_games(num_games=n, first_n_moves=move, onehot=True)
+    #         dummy1, test_accuracy, dummy2 = dnn_go.basic_3layer_NN(
+    #             go_data, verbose=False, hidden_layer_num=2000)
+    #         test_accu[n].append(test_accuracy)
+    #         print "num games = %d, moves = %d, accuracy=%f" %(n, move, test_accuracy)
+    # with open("generated_data/accuracy_decay", "w") as f:
+    #     f.write(pickle.dumps(test_accu))
 
+    with open("generated_data/accuracy_decay", "r") as f:
+        result = pickle.loads(f.read())
+        f.close()
+    legend = []
+    for num_game, accuracies in result.iteritems():
+        plt.plot(range(1, 21), accuracies)
+        legend.append(num_game)
 
-    # plt.plot(test_accuracy)
-    # plt.xlabel("number of moves")
-    # plt.ylabel("prediction accuracy")
-    # plt.show()
+    plt.xlabel("number of moves")
+    plt.ylabel("prediction accuracy")
+    plt.title("decreasing prediction accuracy with increasing board complexity")
+    plt.legend(legend)
+    plt.show()
 
 
 def draw_board_probabilities():
