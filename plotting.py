@@ -19,7 +19,7 @@ def main():
 
 
 def dropout_or_not():
-    go_data = gp.parse_games(num_games=300, first_n_moves=10, onehot=True)
+    go_data = gp.parse_games(num_games=30000, first_n_moves=10, onehot=True)
     x = [0.0, .2, 0.5, 0.8]
     train_accu = []
     test_accu = []
@@ -31,7 +31,8 @@ def dropout_or_not():
         test_accu.append(test_accuracy)
         time.append(training_time)
     with open("generated_data/dropout_or_not.pkl", "w") as f:
-        f.write(pickle.dumps([x, train_accu, test_accu, time]))
+        f.write(pickle.dumps({"x": x, "train accuracy": train_accu,
+                              "test accuracy": test_accu, "time": time}))
 
     with open("generated_data/dropout_or_not.pkl", "r") as f:
         print pickle.loads(f.read())
