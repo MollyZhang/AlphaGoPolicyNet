@@ -114,8 +114,8 @@ if __name__ == '__main__':
 
     ############################
     # conv layers
-    size_list = [19, 19]
-    num_list = [1, 20]
+    size_list = [19, 19, 10]
+    num_list = [1, 20, 20]
     x_diff_list = [0, layer_width, layer_width, layer_width, layer_width]
     text_list = ['Inputs'] + ['Feature\nmaps'] * (len(size_list) - 1)
     loc_diff_list = [[3, -3]] * len(size_list)
@@ -133,10 +133,10 @@ if __name__ == '__main__':
 
     ############################
     # in between layers
-    start_ratio_list = [[0.4, 0.5]]
-    patch_size_list = [6]
+    start_ratio_list = [[0.4, 0.5], [0.4, 0.8]]
+    patch_size_list = [7, 2]
     ind_bgn_list = range(len(patch_size_list))
-    text_list = ['Convolution', '*No-pooling', 'Convolution', 'Max-pooling']
+    text_list = ['Convolution', 'Max pooling', 'Convolution', 'Max-pooling']
 
     for ind in range(len(patch_size_list)):
         add_mapping(patches, colors, start_ratio_list[ind],
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     ############################
     # fully connected layers
     size_list = [fc_unit_size, fc_unit_size, fc_unit_size]
-    num_list = [3610, 2000, 361]
+    num_list = [2000, 2000, 361]
     num_show_list = map(min, num_list, [NumFcMax] * len(num_list))
     x_diff_list = [sum(x_diff_list) + layer_width, layer_width, layer_width]
     top_left_list = np.c_[np.cumsum(x_diff_list), np.zeros(len(x_diff_list))]
