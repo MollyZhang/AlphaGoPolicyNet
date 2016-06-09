@@ -97,6 +97,8 @@ def train(go_data, sess, train_step, accuracy, x, y, y_,
     epoch_times = []
     t1 = datetime.now()
     best_accu_updated = 0   # how many epochs ago is the best accuracy updated#
+    train_accuracies = []
+    val_accuracies = []
     while best_accu_updated < 10 and previous_epoch <= 50:
         batch = go_data.train.next_batch(128)
         if go_data.train.epochs_completed > previous_epoch:
@@ -104,6 +106,8 @@ def train(go_data, sess, train_step, accuracy, x, y, y_,
             train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1], keep_prob:1.0})
             val_accuracy = accuracy.eval(feed_dict={
                 x: go_data.validation.features, y_: go_data.validation.labels, keep_prob:1.0})
+            train_accuracies.append(train_accuracy)
+            val_accuracies.append(val_accuracy)
             if verbose:
                 print("epoch %d: training accuracy %g, validation accuracy %g" %(
                     previous_epoch, train_accuracy, val_accuracy))
@@ -122,12 +126,6 @@ def train(go_data, sess, train_step, accuracy, x, y, y_,
 
     t2 = datetime.now()
     training_time = (t2-t1).total_seconds()
-
-
-    test_accuracy = accuracy.eval(feed_dict={
-        x: go_data.test.features, y_: go_data.test.labels, keep_prob:1})
-    train_accuracy = accuracy.eval(feed_dict={
-        x: batch[0], y_: batch[1], keep_prob: 1.0})
 
     # if modelfile:
     #     saver.save(sess, modelfile)
@@ -149,7 +147,7 @@ def train(go_data, sess, train_step, accuracy, x, y, y_,
     #        np.array(board).reshape((19, 19)), \
     #        np.array(move).reshape((19, 19))
 
-    return train_accuracy, val_accuracy, training_time, epoch_time
+    return train_accuracies, val_accuracies, training_time, epoch_time
 
 
 def basic_softmax_NN():
