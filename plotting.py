@@ -15,24 +15,31 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    plot_accuracy_over_moves()
-
+    plot_accuracy_scaling_with_training_example()
 
 def plot_accuracy_scaling_with_training_example():
-    accu = {"train": [], "test": [], "epoch_time": []}
-    for n in [1000, 3000, 5000, 10000, 30000, 50000, 'All']:
-        go_data = gp.parse_games(num_games=n, first_n_moves=10, onehot=True)
-        train_accuracy, test_accuracy, epoch_time = dnn_go.basic_3layer_NN(go_data, hidden_layer_num=2000)
-        accu["train"].append(train_accuracy)
-        accu["test"].append(test_accuracy)
-        accu["epoch_time"].append(epoch_time)
-        print n
-        print train_accuracy
-        print test_accuracy
-        print epoch_time, "seconds"
-    print accu
+    # accu = {"train": [], "test": [], "epoch_time": []}
+    # for n in [1000, 3000, 5000, 10000, 30000, 50000, 'All']:
+    #     go_data = gp.parse_games(num_games=n, first_n_moves=10, onehot=True)
+    #     train_accuracy, test_accuracy, epoch_time = dnn_go.basic_3layer_NN(go_data, hidden_layer_num=2000)
+    #     accu["train"].append(train_accuracy)
+    #     accu["test"].append(test_accuracy)
+    #     accu["epoch_time"].append(epoch_time)
+    #     print n
+    #     print train_accuracy
+    #     print test_accuracy
+    #     print epoch_time, "seconds"
+    # print accu
     with open("generated_data/first_10/sample_size_accuracy_2.pkl", "w") as f:
-        f.write(pickle.dumps(accu))
+        accu2 = pickle.loads(f.read())
+        f.close()
+
+    with open("generated_data/first_10/sample_size_accuracy_1.pkl", "w") as f:
+        accu1 = pickle.loads(f.read())
+        f.close()
+    print accu1
+    print accu2
+
 
 def plot_hidden_node_and_accuracy():
     accu = {"train": [], "test": []}
@@ -88,7 +95,7 @@ def draw_board_probabilities_10_step():
 
 
 
-def plot_accuracy_over_moves():
+def plot_accuracy_decay_over_moves():
     # test_accu = {1000: [], 5000: [], 20000: []}
     # for n in [1000, 5000, 20000]:
     #     for move in range(1, 21):
@@ -106,12 +113,12 @@ def plot_accuracy_over_moves():
     legend = []
     for num_game, accuracies in result.iteritems():
         plt.plot(range(1, 21), accuracies)
-        legend.append(num_game)
+        legend.append(str(num_game) + " training games")
 
     plt.xlabel("number of moves")
     plt.ylabel("prediction accuracy")
     plt.title("decreasing prediction accuracy with increasing board complexity")
-    plt.legend(legend)
+    plt.legend(legend, loc="bestdfd")
     plt.show()
 
 
