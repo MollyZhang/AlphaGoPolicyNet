@@ -3,15 +3,16 @@ import pandas as pd
 import numpy as np
 import pickle
 import copy
-import go_parser
+import go_parser as gp
 from datetime import datetime
 
 def main():
-    go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
+    go_data = gp.parse_games(num_games=100, first_n_moves=10, onehot=True)
+    conv(go_data)
 
-
-def conv(go_data, learning_rate=3e-4, drop_out_rate=0.5,
-         conv_patch_size=6, conv_features=20, hidden_nodes=2000):
+def conv(go_data, learning_rate=1e-4, drop_out_rate=0.5,
+         conv_patch_size=6, conv_features=20, hidden_nodes=2000,
+         dropout_rate=0.5, verbose=True):
 
     go_data.train._epochs_completed = 0
     sess = tf.InteractiveSession()
@@ -37,34 +38,15 @@ def conv(go_data, learning_rate=3e-4, drop_out_rate=0.5,
     W_fc2 = weight_variable([hidden_nodes, 361])
     b_fc2 = bias_variable([361])
 
-    y_conv=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+    y = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y_conv), reduction_indices=[1]))
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
     train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
-    correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
+    correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     sess.run(tf.initialize_all_variables())
+    return train(go_data, sess, train_step, accuracy, x, y, y_, keep_prob, dropout_rate, verbose)
 
-    best_accuracy = 0
-    previous_epoch = 0
-    while go_data.train.epochs_completed < epoch:
-        batch = go_data.train.next_batch(batch_size)
-        if go_data.train.epochs_completed > previous_epoch:
-            previous_epoch = go_data.train.epochs_completed
-            train_accuracy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1], keep_prob:1.0})
-            val_accuracy = accuracy.eval(feed_dict={
-                x: go_data.validation.features, y_: go_data.validation.labels, keep_prob:1.0})
-            print("epoch %d: training accuracy %g, validation accuracy %g" %(
-                previous_epoch, train_accuracy, val_accuracy))
-            if val_accuracy > best_accuracy:
-                print "best accuracy"
-                best_accuracy = copy.deepcopy(val_accuracy)
-
-        train_step.run(feed_dict={
-            x: batch[0], y_: batch[1], keep_prob:(1-drop_out_rate)})
-    test_accuracy = accuracy.eval(feed_dict={
-        x: go_data.test.features, y_: go_data.test.labels, keep_prob:1})
-    print "test accuracy %f" % test_accuracy
 
 def basic_3layer_NN(go_data, verbose=True,
                     learning_rate=1.0,
