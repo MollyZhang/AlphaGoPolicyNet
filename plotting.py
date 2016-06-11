@@ -17,7 +17,7 @@ COLUMNS = [chr(ord('a') + i) for i in range(19)]
 ROWS = [chr(ord('a') + i) for i in range(19)]
 
 def main():
-    patch_size()
+    draw_board_probabilities_10_step()
 
 
 def patch_size():
@@ -194,7 +194,6 @@ def plot_accuracy_scaling_with_training_example():
     ax2.legend(["epoch time"], loc="lower right")
     plt.show()
 
-
 def plot_hidden_node_and_accuracy():
     accu = {"train": [], "test": []}
     go_data = gp.parse_games(num_games=10000, first_n_moves=10, onehot=True)
@@ -224,7 +223,6 @@ def plot_hidden_node_and_accuracy():
     plt.legend(legend, loc="best")
     plt.show()
 
-
 def get_prediction_example():
     prob, board, move = gp.basic_3layer_NN(
         num_games=1000, first_n=10, epoch=20, move_only=True)
@@ -238,9 +236,16 @@ def get_prediction_example():
 
 
 def draw_board_probabilities_10_step():
-    with open("/Users/Molly/Desktop/CMPS218 Deep Learning/AlphaGoPolicyNet/generated_data/probability_10_step", "r") as f:
-        prob, board, move = pickle.loads(f.read())
+    with open("/Users/Molly/Desktop/CMPS218 Deep Learning/AlphaGoPolicyNet/generated_data/probs_first_10.pkl", "r") as f:
+        result = pickle.loads(f.read())
+        probs, boards, moves = result['probs'], result['boards'], result['moves']
         f.close()
+
+    i = 2
+    board = np.array(boards[i]).reshape((19, 19))
+    move = np.array(moves[i]).reshape((19, 19))
+    prob = np.array(probs[i]).reshape((19, 19))
+
     board = (board * 2).astype(int)
 
     vz.draw_board(board, move, prob)

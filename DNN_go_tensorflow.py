@@ -7,8 +7,9 @@ import go_parser as gp
 from datetime import datetime
 
 def main():
-    go_data = gp.parse_games(num_games=100, first_n_moves=10, onehot=True)
-    print conv(go_data, pooling=False)
+    go_data = gp.parse_games(num_games=1000, first_n_moves=10000, onehot=True)
+    basic_3layer_NN(go_data)
+
 
 def conv(go_data, learning_rate=1e-4, drop_out_rate=0.5,
          conv_patch_size=6, conv_features=20, hidden_nodes=2000,
@@ -131,23 +132,15 @@ def train(go_data, sess, train_step, accuracy, x, y, y_,
     #     saver.save(sess, modelfile)
 
     probabilities = y
-    board = [go_data.test.features[0]]
-    move = [go_data.test.labels[0]]
-    feed_dict = {x: board, y_: move, keep_prob: 1.0}
-    prob = probabilities.eval(feed_dict=feed_dict, session=sess)
+    boards = go_data.test.features[:10]
+    moves = go_data.test.labels[:10]
+    probs = []
+    for i in range(10):
+        feed_dict = {x: [boards[i]], y_: [moves[i]], keep_prob: 1.0}
+        probs.append(probabilities.eval(feed_dict=feed_dict, session=sess))
+    return boards, moves, probs
 
-    # print "board:"
-    # print pd.DataFrame(np.array(board).reshape((19, 19)))
-    # print "move"
-    # print pd.DataFrame(np.array(move).reshape((19, 19)))
-    # print "probabilities"
-    # print pd.DataFrame(np.array(prob).reshape((19, 19)))
-
-    # return np.array(prob).reshape((19, 19)), \
-    #        np.array(board).reshape((19, 19)), \
-    #        np.array(move).reshape((19, 19))
-
-    return train_accuracies, val_accuracies, training_time, epoch_time
+    # return train_accuracies, val_accuracies, training_time, epoch_time
 
 
 def basic_softmax_NN():

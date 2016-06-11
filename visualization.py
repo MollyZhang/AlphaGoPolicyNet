@@ -67,7 +67,7 @@ def draw_board(board, move, prob):
         for j in range(0, 19):
             stone = (i, j)
             # draw probability
-            transparency = new_probs[stone]
+            transparency = new_probs[stone]/2
             s, = ax.plot(stone[1], 18-stone[0], 'o', markersize=28,
                 color = (0.75, 0, 0.75, transparency), markeredgewidth=0)
 
@@ -76,18 +76,15 @@ def draw_board(board, move, prob):
                 s1, = ax.plot(stone[1], 18-stone[0], 'o', markersize=28,
                     markerfacecolor=stone_color, markeredgewidth=1)
 
-            # if move[stone] == 1:
-            #     s1, = ax.plot(stone[1], 18-stone[0], 'o', markersize=28,
-            #         markerfacecolor="r", markeredgewidth=1)
-
-
+            if move[stone] == 1:
+                s1, = ax.plot(stone[1], 18-stone[0], '*', markersize=28,
+                    markerfacecolor="w", markeredgewidth=1,)
 
 
 
     plt.show()
 
 
-    import matplotlib.pyplot as plt
 
 
 def draw_neural_net(layer_sizes):

@@ -217,7 +217,6 @@ def map_2d_to_1d(datas, data_type):
         raise Exception("only 'x' or 'y' can be passed as 2nd parameter in this function")
 
 
-
 def map_1d_to_2d(labels):
     """the reversion of 1d label to 2d tuple label"""
     return [(label/19, label%19) for label in labels]
@@ -335,3 +334,23 @@ def count_games_with_starting_stones():
                 num += 1
                 break
     return num
+
+def is_attari(board):
+    """decide if a point on board is attari
+    0: not attari, 1: attari
+    """
+    attari_matrix = np.zeros((19, 19))
+    for i in range(19):
+        for j in range(19):
+            if board[i][j] != 0:
+                attari_matrix[i]
+
+
+
+
+
+
+
+
+
+
