@@ -26,3 +26,11 @@ with a softmax network at 361x361 with no hidden layer and 1000 games, trained f
 with network at 361x361x361 with 3000 games, I got a higher 4.0% accuracy
 
 During this whole time the convolutional netork has worse performance than simple vanilla neural network with one hidden layer, possiblity because convolutional net is harder to train.
+
+
+####07/01/2016
+Project finished at June 14th, here are
+[The final presentation](https://github.com/MollyZhang/AlphaGoPolicyNet/blob/master/HPC%20and%20Deep%20Learning%20Project%20Presentation.pdf) and 
+[The final report](https://github.com/MollyZhang/AlphaGoPolicyNet/blob/master/CMPS218FinalReport%20Molly%20Zhang.pdf).
+
+
